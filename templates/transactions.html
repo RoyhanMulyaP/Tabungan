@@ -7,7 +7,7 @@
         <h1>Daftar <span>Transaksi</span></h1>
         <p class="page-subtitle">Riwayat pemasukan dan pengeluaran Anda</p>
     </div>
-    <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">
+    <a href="{{ url_for('add_transaction') }}" class="btn btn-primary btn-add-transaction-desktop">
         <i class="fas fa-plus"></i> Tambah Transaksi
     </a>
 </div>
@@ -24,7 +24,7 @@
         <i class="fas fa-arrow-up"></i> Pengeluaran
     </a>
 
-    <select class="form-control" style="width: auto; min-width: 160px; padding: 8px 32px 8px 12px;"
+    <select class="form-control filter-category-select"
             onchange="window.location.href='{{ url_for('transactions') }}?type={{ type_filter }}&category=' + this.value">
         <option value="0">Semua Kategori</option>
         {% for cat in categories %}
@@ -33,77 +33,79 @@
     </select>
 </div>
 
-<!-- Transaction Table -->
+<!-- Transaction Content -->
 <div class="card">
-    <div class="card-body" style="padding: 0;">
+    <div class="card-body transaction-card-body">
         {% if transactions.items %}
 
-        <!-- Desktop Table View -->
-        <table class="data-table data-table-desktop">
-            <thead>
-                <tr>
-                    <th>Tanggal</th>
-                    <th>Deskripsi</th>
-                    <th>Kategori</th>
-                    <th>Tipe</th>
-                    <th style="text-align: right;">Jumlah</th>
-                    <th style="text-align: center;">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for t in transactions.items %}
-                <tr>
-                    <td>
-                        <span style="font-weight: 600; font-size: 13px;">{{ t.date|date_format }}</span>
-                    </td>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div class="transaction-icon {{ t.type }}" style="width: 34px; height: 34px; font-size: 13px;">
-                                <i class="{{ t.category.icon if t.category else ('fas fa-arrow-down' if t.type == 'income' else 'fas fa-arrow-up') }}"></i>
+        <!-- Desktop Table View (hidden on mobile via CSS) -->
+        <div class="data-table-desktop">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Deskripsi</th>
+                        <th>Kategori</th>
+                        <th>Tipe</th>
+                        <th style="text-align: right;">Jumlah</th>
+                        <th style="text-align: center;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in transactions.items %}
+                    <tr>
+                        <td>
+                            <span style="font-weight: 600; font-size: 13px;">{{ t.date|date_format }}</span>
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div class="transaction-icon {{ t.type }}" style="width: 34px; height: 34px; font-size: 13px;">
+                                    <i class="{{ t.category.icon if t.category else ('fas fa-arrow-down' if t.type == 'income' else 'fas fa-arrow-up') }}"></i>
+                                </div>
+                                <span style="font-weight: 500;">{{ t.description or 'Tanpa deskripsi' }}</span>
                             </div>
-                            <span style="font-weight: 500;">{{ t.description or 'Tanpa deskripsi' }}</span>
-                        </div>
-                    </td>
-                    <td>
-                        {% if t.category %}
-                        <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px;">
-                            <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ t.category.color }};"></span>
-                            {{ t.category.name }}
-                        </span>
-                        {% else %}
-                        <span style="color: var(--text-muted);">-</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <span class="badge {% if t.type == 'income' %}badge-income{% else %}badge-expense{% endif %}">
-                            {% if t.type == 'income' %}Pemasukan{% else %}Pengeluaran{% endif %}
-                        </span>
-                    </td>
-                    <td style="text-align: right;">
-                        <span class="transaction-amount {{ t.type }}" style="font-size: 14px;">
-                            {% if t.type == 'income' %}+{% else %}-{% endif %}{{ t.amount|currency }}
-                        </span>
-                    </td>
-                    <td style="text-align: center;">
-                        <div style="display: flex; gap: 6px; justify-content: center;">
-                            <a href="{{ url_for('edit_transaction', id=t.id) }}" class="btn btn-ghost btn-sm" data-tooltip="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form method="POST" action="{{ url_for('delete_transaction', id=t.id) }}" style="display: inline;"
-                                  onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');">
-                                <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--accent-red);" data-tooltip="Hapus">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        </td>
+                        <td>
+                            {% if t.category %}
+                            <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px;">
+                                <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ t.category.color }};"></span>
+                                {{ t.category.name }}
+                            </span>
+                            {% else %}
+                            <span style="color: var(--text-muted);">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {% if t.type == 'income' %}badge-income{% else %}badge-expense{% endif %}">
+                                {% if t.type == 'income' %}Pemasukan{% else %}Pengeluaran{% endif %}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <span class="transaction-amount {{ t.type }}" style="font-size: 14px;">
+                                {% if t.type == 'income' %}+{% else %}-{% endif %}{{ t.amount|currency }}
+                            </span>
+                        </td>
+                        <td style="text-align: center;">
+                            <div style="display: flex; gap: 6px; justify-content: center;">
+                                <a href="{{ url_for('edit_transaction', id=t.id) }}" class="btn btn-ghost btn-sm" data-tooltip="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('delete_transaction', id=t.id) }}" style="display: inline;"
+                                      onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');">
+                                    <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--accent-red);" data-tooltip="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-        <!-- Mobile Card View -->
-        <div class="mobile-transaction-cards" style="padding: 12px;">
+        <!-- Mobile Card View (hidden on desktop via CSS) -->
+        <div class="mobile-transaction-cards">
             {% for t in transactions.items %}
             <div class="mobile-transaction-card">
                 <div class="mobile-tc-top">
@@ -130,7 +132,12 @@
                 <div class="mobile-tc-bottom">
                     <div class="mobile-tc-date">
                         <i class="fas fa-calendar-alt"></i>
-                        {{ t.date|date_format }}
+                        {{ t.date|short_date }}
+                    </div>
+                    <div class="mobile-tc-badge">
+                        <span class="badge {% if t.type == 'income' %}badge-income{% else %}badge-expense{% endif %}">
+                            {% if t.type == 'income' %}Masuk{% else %}Keluar{% endif %}
+                        </span>
                     </div>
                     <div class="mobile-tc-actions">
                         <a href="{{ url_for('edit_transaction', id=t.id) }}" class="btn btn-ghost btn-sm">
