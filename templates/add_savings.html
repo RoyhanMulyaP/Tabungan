@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Tambah Target Tabungan{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Buat Target <span>Tabungan</span></h1>
+        <p class="page-subtitle">Tetapkan target dan mulai menabung</p>
+    </div>
+    <a href="{{ url_for('savings') }}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Kembali
+    </a>
+</div>
+
+<div style="max-width: 640px;">
+    <div class="card slide-up">
+        <div class="card-body" style="padding: 32px;">
+            <form method="POST" action="{{ url_for('add_savings_goal') }}">
+                <div class="form-group">
+                    <label class="form-label" for="name">
+                        Nama Target <span class="required">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="name" name="name"
+                           placeholder="Contoh: Dana Darurat, Liburan, Gadget Baru" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="target_amount">
+                        Jumlah Target (Rp) <span class="required">*</span>
+                    </label>
+                    <input type="number" class="form-control" id="target_amount" name="target_amount"
+                           placeholder="0" required min="1000" step="1000"
+                           style="font-size: 20px; font-weight: 700; text-align: center; padding: 14px;">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="deadline">Batas Waktu (opsional)</label>
+                    <input type="date" class="form-control" id="deadline" name="deadline">
+                    <div class="form-hint">Kosongkan jika tidak ada batas waktu</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Warna</label>
+                    <div class="color-picker">
+                        {% set colors = ['#00B894', '#00CEC9', '#0984E3', '#6C5CE7', '#A29BFE', '#FD79A8', '#E17055', '#FDCB6E', '#55EFC4', '#74B9FF', '#E84393', '#D63031'] %}
+                        {% for color in colors %}
+                        <div class="color-option {% if color == '#00B894' %}selected{% endif %}"
+                             style="background: {{ color }};"
+                             data-color="{{ color }}"
+                             onclick="selectColor(this, '{{ color }}')"></div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="color" id="selectedColor" value="#00B894">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Ikon</label>
+                    <div class="icon-picker">
+                        {% set icons = ['fas fa-piggy-bank', 'fas fa-home', 'fas fa-car', 'fas fa-plane', 'fas fa-graduation-cap', 'fas fa-laptop', 'fas fa-mobile-alt', 'fas fa-ring', 'fas fa-heartbeat', 'fas fa-gift', 'fas fa-umbrella-beach', 'fas fa-motorcycle', 'fas fa-gem', 'fas fa-camera', 'fas fa-shopping-bag', 'fas fa-coins'] %}
+                        {% for icon in icons %}
+                        <div class="icon-option {% if icon == 'fas fa-piggy-bank' %}selected{% endif %}"
+                             data-icon="{{ icon }}"
+                             onclick="selectIcon(this, '{{ icon }}')">
+                            <i class="{{ icon }}"></i>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="icon" id="selectedIcon" value="fas fa-piggy-bank">
+                </div>
+
+                <button type="submit" class="btn btn-success btn-block btn-lg">
+                    <i class="fas fa-save"></i> Buat Target Tabungan
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function selectColor(el, color) {
+        document.querySelectorAll('.color-option').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('selectedColor').value = color;
+    }
+
+    function selectIcon(el, icon) {
+        document.querySelectorAll('.icon-option').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('selectedIcon').value = icon;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Edit Transaksi{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Edit <span>Transaksi</span></h1>
+        <p class="page-subtitle">Perbarui data transaksi</p>
+    </div>
+    <a href="{{ url_for('transactions') }}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Kembali
+    </a>
+</div>
+
+<div style="max-width: 640px;">
+    <div class="card slide-up">
+        <div class="card-body" style="padding: 32px;">
+            <form method="POST" action="{{ url_for('edit_transaction', id=transaction.id) }}">
+                <!-- Type Toggle -->
+                <div class="type-toggle">
+                    <button type="button" class="toggle-btn {% if transaction.type == 'income' %}active-income{% endif %}"
+                            id="toggleIncome" onclick="setType('income')">
+                        <i class="fas fa-arrow-down"></i> Pemasukan
+                    </button>
+                    <button type="button" class="toggle-btn {% if transaction.type == 'expense' %}active-expense{% endif %}"
+                            id="toggleExpense" onclick="setType('expense')">
+                        <i class="fas fa-arrow-up"></i> Pengeluaran
+                    </button>
+                </div>
+                <input type="hidden" name="type" id="transType" value="{{ transaction.type }}">
+
+                <div class="form-group">
+                    <label class="form-label" for="amount">
+                        Jumlah (Rp) <span class="required">*</span>
+                    </label>
+                    <input type="number" class="form-control" id="amount" name="amount"
+                           value="{{ transaction.amount|int }}" required min="1" step="1000"
+                           style="font-size: 24px; font-weight: 700; text-align: center; padding: 16px;">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="category_id">Kategori</label>
+                        <select class="form-control" id="category_id" name="category_id">
+                            <option value="0">Pilih kategori</option>
+                            <optgroup label="📥 Pemasukan" id="incomeCatGroup" {% if transaction.type == 'expense' %}style="display:none"{% endif %}>
+                                {% for cat in income_categories %}
+                                <option value="{{ cat.id }}" {% if transaction.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </optgroup>
+                            <optgroup label="📤 Pengeluaran" id="expenseCatGroup" {% if transaction.type == 'income' %}style="display:none"{% endif %}>
+                                {% for cat in expense_categories %}
+                                <option value="{{ cat.id }}" {% if transaction.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="date">Tanggal</label>
+                        <input type="date" class="form-control" id="date" name="date"
+                               value="{{ transaction.date.strftime('%Y-%m-%d') }}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="description">Deskripsi</label>
+                    <textarea class="form-control" id="description" name="description" rows="3">{{ transaction.description or '' }}</textarea>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;">
+                        <i class="fas fa-save"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function setType(type) {
+        document.getElementById('transType').value = type;
+        const incBtn = document.getElementById('toggleIncome');
+        const expBtn = document.getElementById('toggleExpense');
+        const incGroup = document.getElementById('incomeCatGroup');
+        const expGroup = document.getElementById('expenseCatGroup');
+        const catSelect = document.getElementById('category_id');
+
+        if (type === 'income') {
+            incBtn.className = 'toggle-btn active-income';
+            expBtn.className = 'toggle-btn';
+            incGroup.style.display = '';
+            expGroup.style.display = 'none';
+        } else {
+            incBtn.className = 'toggle-btn';
+            expBtn.className = 'toggle-btn active-expense';
+            incGroup.style.display = 'none';
+            expGroup.style.display = '';
+        }
+        catSelect.value = '0';
+    }
+</script>
+{% endblock %}

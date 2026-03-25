@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Tabungan{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Target <span>Tabungan</span></h1>
+        <p class="page-subtitle">Kelola target tabungan dan lacak progres Anda</p>
+    </div>
+    <a href="{{ url_for('add_savings_goal') }}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Buat Target Baru
+    </a>
+</div>
+
+<!-- Summary Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <div class="stat-card balance slide-up">
+        <div class="stat-icon"><i class="fas fa-coins"></i></div>
+        <div class="stat-label">Total Terkumpul</div>
+        <div class="stat-value count-up" data-value="{{ total_saved }}">Rp 0</div>
+    </div>
+    <div class="stat-card savings slide-up">
+        <div class="stat-icon"><i class="fas fa-flag-checkered"></i></div>
+        <div class="stat-label">Total Target</div>
+        <div class="stat-value count-up" data-value="{{ total_target }}">Rp 0</div>
+    </div>
+    <div class="stat-card income slide-up">
+        <div class="stat-icon"><i class="fas fa-bullseye"></i></div>
+        <div class="stat-label">Jumlah Target</div>
+        <div class="stat-value">{{ goals|length }}</div>
+    </div>
+</div>
+
+<!-- Savings Grid -->
+{% if goals %}
+<div class="savings-grid">
+    {% for goal in goals %}
+    <a href="{{ url_for('savings_detail', id=goal.id) }}" style="text-decoration: none;">
+        <div class="savings-card slide-up">
+            <div class="savings-header">
+                <div class="savings-icon" style="background: {{ goal.color }};">
+                    <i class="{{ goal.icon }}"></i>
+                </div>
+                <div>
+                    <div class="savings-name">{{ goal.name }}</div>
+                    <div class="savings-deadline">
+                        {% if goal.deadline %}
+                        <i class="fas fa-calendar-alt"></i> Target: {{ goal.deadline|date_format }}
+                        {% else %}
+                        <i class="fas fa-infinity"></i> Tanpa batas waktu
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="savings-amounts">
+                <div class="savings-current">{{ goal.current_amount|currency }}</div>
+                <div class="savings-target">/ {{ goal.target_amount|currency }}</div>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: {{ goal.progress_percent }}%; background: {{ goal.color }};"></div>
+            </div>
+
+            <div class="progress-label">
+                <span>{{ "%.1f"|format(goal.progress_percent) }}% tercapai</span>
+                <span>Sisa {{ goal.remaining|currency }}</span>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-piggy-bank"></i></div>
+        <h3>Belum Ada Target Tabungan</h3>
+        <p>Buat target tabungan pertama Anda dan mulai menabung!</p>
+        <a href="{{ url_for('add_savings_goal') }}" class="btn btn-success btn-lg">
+            <i class="fas fa-plus"></i> Buat Target Tabungan
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

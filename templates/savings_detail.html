@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}{{ goal.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: {{ goal.color }}; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">
+                <i class="{{ goal.icon }}"></i>
+            </div>
+            {{ goal.name }}
+        </h1>
+        <p class="page-subtitle">
+            {% if goal.deadline %}
+            Target: {{ goal.deadline|date_format }}
+            {% else %}
+            Tanpa batas waktu
+            {% endif %}
+        </p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="{{ url_for('savings') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </a>
+        <form method="POST" action="{{ url_for('delete_savings_goal', id=goal.id) }}"
+              onsubmit="return confirm('Yakin ingin menghapus target tabungan ini? Semua riwayat setoran juga akan dihapus.');">
+            <button type="submit" class="btn btn-danger btn-sm">
+                <i class="fas fa-trash"></i> Hapus
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Progress Card -->
+<div class="card slide-up" style="margin-bottom: 28px;">
+    <div class="card-body" style="padding: 32px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+            <div>
+                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">Terkumpul</div>
+                <div style="font-size: 32px; font-weight: 800; color: {{ goal.color }};" class="count-up" data-value="{{ goal.current_amount }}">Rp 0</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">Target</div>
+                <div style="font-size: 20px; font-weight: 700; color: var(--text-primary);">{{ goal.target_amount|currency }}</div>
+            </div>
+        </div>
+
+        <div class="progress-bar-container" style="height: 12px; border-radius: 6px;">
+            <div class="progress-bar-fill" style="width: {{ goal.progress_percent }}%; background: {{ goal.color }}; border-radius: 6px;"></div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 13px; color: var(--text-secondary);">
+            <span>{{ "%.1f"|format(goal.progress_percent) }}% tercapai</span>
+            <span>Sisa {{ goal.remaining|currency }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Deposit Form -->
+    <div class="card slide-up">
+        <div class="card-header">
+            <h3><i class="fas fa-plus-circle" style="color: var(--accent-green); margin-right: 8px;"></i>Tambah Setoran</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('add_deposit', id=goal.id) }}">
+                <div class="form-group">
+                    <label class="form-label" for="amount">
+                        Jumlah Setoran (Rp) <span class="required">*</span>
+                    </label>
+                    <input type="number" class="form-control" id="amount" name="amount"
+                           placeholder="0" required min="1" step="1000"
+                           style="font-size: 20px; font-weight: 700; text-align: center; padding: 14px;">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="note">Catatan (opsional)</label>
+                    <input type="text" class="form-control" id="note" name="note"
+                           placeholder="Contoh: Tabungan bulanan">
+                </div>
+
+                <button type="submit" class="btn btn-success btn-block">
+                    <i class="fas fa-save"></i> Simpan Setoran
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Deposit History -->
+    <div class="card slide-up">
+        <div class="card-header">
+            <h3><i class="fas fa-history" style="color: var(--primary); margin-right: 8px;"></i>Riwayat Setoran</h3>
+            <span class="badge badge-success">{{ deposits|length }} setoran</span>
+        </div>
+        <div class="card-body" style="max-height: 380px; overflow-y: auto;">
+            {% if deposits %}
+            <ul class="deposit-list">
+                {% for d in deposits %}
+                <li class="deposit-item">
+                    <div class="deposit-icon">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="deposit-info">
+                        <div class="deposit-amount">+{{ d.amount|currency }}</div>
+                        <div class="deposit-note">{{ d.note or 'Setoran' }}</div>
+                    </div>
+                    <div class="deposit-date">{{ d.date|date_format }}</div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="empty-state" style="padding: 30px 10px;">
+                <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+                <p>Belum ada setoran</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

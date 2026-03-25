@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Anggaran{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Anggaran <span>Bulanan</span></h1>
+        <p class="page-subtitle">Atur batas pengeluaran per kategori</p>
+    </div>
+    <div class="month-selector">
+        {% set prev_month = month - 1 if month > 1 else 12 %}
+        {% set prev_year = year if month > 1 else year - 1 %}
+        {% set next_month = month + 1 if month < 12 else 1 %}
+        {% set next_year = year if month < 12 else year + 1 %}
+        <a href="{{ url_for('budgets', month=prev_month, year=prev_year) }}" class="month-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <span class="month-label">{{ months_id[month] }} {{ year }}</span>
+        <a href="{{ url_for('budgets', month=next_month, year=next_year) }}" class="month-btn">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+    </div>
+</div>
+
+<!-- Summary -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 28px;">
+    <div class="stat-card balance slide-up">
+        <div class="stat-icon"><i class="fas fa-bullseye"></i></div>
+        <div class="stat-label">Total Anggaran</div>
+        <div class="stat-value count-up" data-value="{{ total_budget }}">Rp 0</div>
+    </div>
+    <div class="stat-card expense slide-up">
+        <div class="stat-icon"><i class="fas fa-receipt"></i></div>
+        <div class="stat-label">Total Terpakai</div>
+        <div class="stat-value count-up" data-value="{{ total_spent }}">Rp 0</div>
+    </div>
+    <div class="stat-card income slide-up">
+        <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+        <div class="stat-label">Sisa Anggaran</div>
+        <div class="stat-value count-up" data-value="{{ total_budget - total_spent }}">Rp 0</div>
+    </div>
+</div>
+
+<div class="grid-2-1">
+    <!-- Budget List -->
+    <div class="card slide-up">
+        <div class="card-header">
+            <h3><i class="fas fa-list" style="color: var(--primary); margin-right: 8px;"></i>Daftar Anggaran</h3>
+        </div>
+        <div class="card-body">
+            {% if budget_data %}
+            {% for b in budget_data %}
+            <div class="budget-item">
+                <div class="budget-header">
+                    <div class="budget-category">
+                        <div class="budget-cat-icon" style="background: {{ b.color }};">
+                            <i class="{{ b.icon }}"></i>
+                        </div>
+                        {{ b.category }}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="budget-amounts">
+                            <div class="budget-spent" style="color: {% if b.percent > 90 %}var(--accent-red){% elif b.percent > 70 %}var(--accent-yellow){% else %}var(--accent-green){% endif %};">
+                                {{ b.spent|currency }}
+                            </div>
+                            <div class="budget-limit">dari {{ b.budget|currency }}</div>
+                        </div>
+                        <form method="POST" action="{{ url_for('delete_budget', id=b.id) }}" style="display: inline;"
+                              onsubmit="return confirm('Hapus anggaran ini?');">
+                            <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--text-muted);">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="budget-progress">
+                    <div class="budget-fill" style="width: {{ b.percent }}%; background: {% if b.percent > 90 %}var(--accent-red){% elif b.percent > 70 %}var(--accent-yellow){% else %}{{ b.color }}{% endif %};"></div>
+                </div>
+                <div class="budget-status">
+                    <span>{{ "%.0f"|format(b.percent) }}% terpakai</span>
+                    <span>Sisa {{ b.remaining|currency }}</span>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state" style="padding: 30px 10px;">
+                <div class="empty-icon"><i class="fas fa-bullseye"></i></div>
+                <p>Belum ada anggaran untuk bulan ini</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Add Budget Form -->
+    <div class="card slide-up">
+        <div class="card-header">
+            <h3><i class="fas fa-plus-circle" style="color: var(--accent-green); margin-right: 8px;"></i>Tambah Anggaran</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('add_budget') }}">
+                <input type="hidden" name="month" value="{{ month }}">
+                <input type="hidden" name="year" value="{{ year }}">
+
+                <div class="form-group">
+                    <label class="form-label" for="category_id">Kategori Pengeluaran</label>
+                    <select class="form-control" id="category_id" name="category_id" required>
+                        <option value="">Pilih kategori</option>
+                        {% for cat in expense_categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="budget_amount">Batas Anggaran (Rp)</label>
+                    <input type="number" class="form-control" id="budget_amount" name="amount"
+                           placeholder="0" required min="1000" step="1000"
+                           style="font-size: 18px; font-weight: 700; text-align: center; padding: 12px;">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

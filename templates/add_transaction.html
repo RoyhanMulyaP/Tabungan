@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Tambah Transaksi{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Tambah <span>Transaksi</span></h1>
+        <p class="page-subtitle">Catat pemasukan atau pengeluaran baru</p>
+    </div>
+    <a href="{{ url_for('transactions') }}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Kembali
+    </a>
+</div>
+
+<div style="max-width: 640px;">
+    <div class="card slide-up">
+        <div class="card-body" style="padding: 32px;">
+            <form method="POST" action="{{ url_for('add_transaction') }}" id="transactionForm">
+                <!-- Type Toggle -->
+                <div class="type-toggle">
+                    <button type="button" class="toggle-btn active-income" id="toggleIncome" onclick="setType('income')">
+                        <i class="fas fa-arrow-down"></i> Pemasukan
+                    </button>
+                    <button type="button" class="toggle-btn" id="toggleExpense" onclick="setType('expense')">
+                        <i class="fas fa-arrow-up"></i> Pengeluaran
+                    </button>
+                </div>
+                <input type="hidden" name="type" id="transType" value="income">
+
+                <div class="form-group">
+                    <label class="form-label" for="amount">
+                        Jumlah (Rp) <span class="required">*</span>
+                    </label>
+                    <input type="number" class="form-control" id="amount" name="amount"
+                           placeholder="0" required min="1" step="1000" style="font-size: 24px; font-weight: 700; text-align: center; padding: 16px;">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="category_id">Kategori</label>
+                        <select class="form-control" id="category_id" name="category_id">
+                            <option value="0">Pilih kategori</option>
+                            <optgroup label="📥 Pemasukan" id="incomeCatGroup">
+                                {% for cat in income_categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </optgroup>
+                            <optgroup label="📤 Pengeluaran" id="expenseCatGroup" style="display: none;">
+                                {% for cat in expense_categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="date">Tanggal</label>
+                        <input type="date" class="form-control" id="date" name="date"
+                               value="{{ today if today else '' }}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="description">Deskripsi</label>
+                    <textarea class="form-control" id="description" name="description"
+                              placeholder="Masukkan deskripsi transaksi (opsional)" rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    <i class="fas fa-save"></i> Simpan Transaksi
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Set today's date as default
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+
+    function setType(type) {
+        document.getElementById('transType').value = type;
+        const incBtn = document.getElementById('toggleIncome');
+        const expBtn = document.getElementById('toggleExpense');
+        const incGroup = document.getElementById('incomeCatGroup');
+        const expGroup = document.getElementById('expenseCatGroup');
+        const catSelect = document.getElementById('category_id');
+
+        if (type === 'income') {
+            incBtn.className = 'toggle-btn active-income';
+            expBtn.className = 'toggle-btn';
+            incGroup.style.display = '';
+            expGroup.style.display = 'none';
+        } else {
+            incBtn.className = 'toggle-btn';
+            expBtn.className = 'toggle-btn active-expense';
+            incGroup.style.display = 'none';
+            expGroup.style.display = '';
+        }
+        catSelect.value = '0';
+    }
+
+    // Format number input on change
+    document.getElementById('amount').addEventListener('input', function(e) {
+        if (this.value < 0) this.value = 0;
+    });
+</script>
+{% endblock %}

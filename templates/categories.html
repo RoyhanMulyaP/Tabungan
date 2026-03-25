@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Kategori{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Kelola <span>Kategori</span></h1>
+        <p class="page-subtitle">Atur kategori pemasukan dan pengeluaran</p>
+    </div>
+    <button class="btn btn-primary" onclick="document.getElementById('addCategoryModal').classList.add('active')">
+        <i class="fas fa-plus"></i> Tambah Kategori
+    </button>
+</div>
+
+<!-- Income Categories -->
+<div class="card slide-up" style="margin-bottom: 28px;">
+    <div class="card-header">
+        <h3><i class="fas fa-arrow-down" style="color: var(--accent-green); margin-right: 8px;"></i>Kategori Pemasukan</h3>
+        <span class="badge badge-income">{{ income_categories|length }} kategori</span>
+    </div>
+    <div class="card-body">
+        {% if income_categories %}
+        <div class="category-grid">
+            {% for cat in income_categories %}
+            <div class="category-chip">
+                <div class="cat-icon" style="background: {{ cat.color }};">
+                    <i class="{{ cat.icon }}"></i>
+                </div>
+                <div style="flex: 1;">
+                    <div class="cat-name">{{ cat.name }}</div>
+                    <div class="cat-type">Pemasukan</div>
+                </div>
+                <form method="POST" action="{{ url_for('delete_category', id=cat.id) }}" style="display: inline;"
+                      onsubmit="return confirm('Hapus kategori {{ cat.name }}?');">
+                    <button type="submit" class="cat-delete">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color: var(--text-muted); text-align: center; padding: 20px;">Belum ada kategori pemasukan</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Expense Categories -->
+<div class="card slide-up">
+    <div class="card-header">
+        <h3><i class="fas fa-arrow-up" style="color: var(--accent-orange); margin-right: 8px;"></i>Kategori Pengeluaran</h3>
+        <span class="badge badge-expense">{{ expense_categories|length }} kategori</span>
+    </div>
+    <div class="card-body">
+        {% if expense_categories %}
+        <div class="category-grid">
+            {% for cat in expense_categories %}
+            <div class="category-chip">
+                <div class="cat-icon" style="background: {{ cat.color }};">
+                    <i class="{{ cat.icon }}"></i>
+                </div>
+                <div style="flex: 1;">
+                    <div class="cat-name">{{ cat.name }}</div>
+                    <div class="cat-type">Pengeluaran</div>
+                </div>
+                <form method="POST" action="{{ url_for('delete_category', id=cat.id) }}" style="display: inline;"
+                      onsubmit="return confirm('Hapus kategori {{ cat.name }}?');">
+                    <button type="submit" class="cat-delete">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color: var(--text-muted); text-align: center; padding: 20px;">Belum ada kategori pengeluaran</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal-overlay" id="addCategoryModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Tambah Kategori</h3>
+            <button class="modal-close" onclick="document.getElementById('addCategoryModal').classList.remove('active')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ url_for('add_category') }}">
+            <div class="form-group">
+                <label class="form-label" for="cat_name">Nama Kategori <span class="required">*</span></label>
+                <input type="text" class="form-control" id="cat_name" name="name" placeholder="Nama kategori" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Tipe</label>
+                <div class="type-toggle">
+                    <button type="button" class="toggle-btn active-expense" id="catToggleExpense" onclick="setCatType('expense')">
+                        <i class="fas fa-arrow-up"></i> Pengeluaran
+                    </button>
+                    <button type="button" class="toggle-btn" id="catToggleIncome" onclick="setCatType('income')">
+                        <i class="fas fa-arrow-down"></i> Pemasukan
+                    </button>
+                </div>
+                <input type="hidden" name="type" id="catType" value="expense">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Warna</label>
+                <div class="color-picker">
+                    {% set colors = ['#6C5CE7', '#A29BFE', '#00B894', '#00CEC9', '#0984E3', '#74B9FF', '#FD79A8', '#E84393', '#E17055', '#FDCB6E', '#55EFC4', '#D63031'] %}
+                    {% for color in colors %}
+                    <div class="color-option {% if color == '#6C5CE7' %}selected{% endif %}"
+                         style="background: {{ color }};"
+                         onclick="selectCatColor(this, '{{ color }}')"></div>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="color" id="catColor" value="#6C5CE7">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Ikon</label>
+                <div class="icon-picker">
+                    {% set icons = ['fas fa-tag', 'fas fa-utensils', 'fas fa-car', 'fas fa-home', 'fas fa-briefcase', 'fas fa-laptop-code', 'fas fa-graduation-cap', 'fas fa-heartbeat', 'fas fa-gamepad', 'fas fa-shopping-bag', 'fas fa-file-invoice', 'fas fa-gift', 'fas fa-chart-line', 'fas fa-plane', 'fas fa-bus', 'fas fa-tshirt'] %}
+                    {% for icon in icons %}
+                    <div class="icon-option {% if icon == 'fas fa-tag' %}selected{% endif %}"
+                         onclick="selectCatIcon(this, '{{ icon }}')">
+                        <i class="{{ icon }}"></i>
+                    </div>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="icon" id="catIcon" value="fas fa-tag">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+                <i class="fas fa-save"></i> Simpan Kategori
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function setCatType(type) {
+        document.getElementById('catType').value = type;
+        const incBtn = document.getElementById('catToggleIncome');
+        const expBtn = document.getElementById('catToggleExpense');
+        if (type === 'income') {
+            incBtn.className = 'toggle-btn active-income';
+            expBtn.className = 'toggle-btn';
+        } else {
+            incBtn.className = 'toggle-btn';
+            expBtn.className = 'toggle-btn active-expense';
+        }
+    }
+
+    function selectCatColor(el, color) {
+        el.closest('.color-picker').querySelectorAll('.color-option').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('catColor').value = color;
+    }
+
+    function selectCatIcon(el, icon) {
+        el.closest('.icon-picker').querySelectorAll('.icon-option').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('catIcon').value = icon;
+    }
+
+    // Close modal on overlay click
+    document.getElementById('addCategoryModal').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('active');
+    });
+</script>
+{% endblock %}
