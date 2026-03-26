@@ -65,11 +65,17 @@
         <div class="card-body">
             <form method="POST" action="{{ url_for('add_deposit', id=goal.id) }}">
                 <div class="form-group">
+                    <label class="form-label" for="depositor_name">Nama Penyetor (opsional)</label>
+                    <input type="text" class="form-control" id="depositor_name" name="depositor_name"
+                           placeholder="Contoh: Budi, Ani, dll">
+                </div>
+
+                <div class="form-group">
                     <label class="form-label" for="amount">
                         Jumlah Setoran (Rp) <span class="required">*</span>
                     </label>
                     <input type="number" class="form-control" id="amount" name="amount"
-                           placeholder="0" required min="1" step="1000"
+                           placeholder="0" required min="1" step="1" inputmode="numeric"
                            style="font-size: 20px; font-weight: 700; text-align: center; padding: 14px;">
                 </div>
 
@@ -96,15 +102,27 @@
             {% if deposits %}
             <ul class="deposit-list">
                 {% for d in deposits %}
-                <li class="deposit-item">
-                    <div class="deposit-icon">
-                        <i class="fas fa-arrow-down"></i>
+                <li class="deposit-item" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 14px; flex: 1;">
+                        <div class="deposit-icon">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div class="deposit-info">
+                            <div class="deposit-amount">+{{ d.amount|currency }}</div>
+                            <div class="deposit-note">
+                                {% if d.depositor_name %}<span style="font-weight: 600; color: var(--text-primary);">{{ d.depositor_name }}</span> - {% endif %}{{ d.note or 'Setoran' }}
+                            </div>
+                        </div>
                     </div>
-                    <div class="deposit-info">
-                        <div class="deposit-amount">+{{ d.amount|currency }}</div>
-                        <div class="deposit-note">{{ d.note or 'Setoran' }}</div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="deposit-date">{{ d.date|date_format }}</div>
+                        <form method="POST" action="{{ url_for('delete_deposit', id=d.id) }}" style="display: inline;"
+                              onsubmit="return confirm('Yakin ingin menghapus setoran ini? Saldo tabungan akan berkurang.');">
+                            <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--accent-red); padding: 4px 8px;" data-tooltip="Hapus Setoran">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
                     </div>
-                    <div class="deposit-date">{{ d.date|date_format }}</div>
                 </li>
                 {% endfor %}
             </ul>

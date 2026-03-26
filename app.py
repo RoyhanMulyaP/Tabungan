@@ -111,6 +111,7 @@ class SavingsDeposit(db.Model):
     """Model untuk riwayat setoran tabungan."""
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float, nullable=False)
+    depositor_name = db.Column(db.String(100))
     note = db.Column(db.String(200))
     date = db.Column(db.Date, nullable=False, default=date.today)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -626,6 +627,7 @@ def add_deposit(id):
     goal = SavingsGoal.query.filter_by(id=id, user_id=current_user.id).first_or_404()
 
     amount = request.form.get('amount', 0, type=float)
+    depositor_name = request.form.get('depositor_name', '').strip()
     note = request.form.get('note', '').strip()
 
     if amount <= 0:
@@ -634,6 +636,7 @@ def add_deposit(id):
 
     deposit = SavingsDeposit(
         amount=amount,
+        depositor_name=depositor_name,
         note=note,
         goal_id=goal.id
     )
@@ -644,6 +647,28 @@ def add_deposit(id):
 
     flash(f'Setoran Rp {amount:,.0f} berhasil ditambahkan!', 'success')
     return redirect(url_for('savings_detail', id=id))
+
+
+@app.route('/savings/deposit/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_deposit(id):
+    deposit = SavingsDeposit.query.join(SavingsGoal).filter(
+        SavingsDeposit.id == id,
+        SavingsGoal.user_id == current_user.id
+    ).first_or_404()
+    
+    goal = deposit.goal
+    
+    # Kurangi saldo deposit dari target tabungan
+    goal.current_amount -= deposit.amount
+    if goal.current_amount < 0:
+        goal.current_amount = 0
+        
+    db.session.delete(deposit)
+    db.session.commit()
+    
+    flash('Setoran berhasil dihapus.', 'warning')
+    return redirect(url_for('savings_detail', id=goal.id))
 
 
 @app.route('/savings/<int:id>/delete', methods=['POST'])
