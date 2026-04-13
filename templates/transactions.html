@@ -13,25 +13,50 @@
 </div>
 
 <!-- Filter Bar -->
-<div class="filter-bar">
-    <a href="{{ url_for('transactions', type='all') }}" class="filter-chip {% if type_filter == 'all' %}active{% endif %}">
+<div class="filter-bar" style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <a href="{{ url_for('transactions', type='all', category=category_filter, payment_method=payment_method_filter, date=date_filter) }}" class="filter-chip {% if type_filter == 'all' %}active{% endif %}">
         <i class="fas fa-list"></i> Semua
     </a>
-    <a href="{{ url_for('transactions', type='income') }}" class="filter-chip {% if type_filter == 'income' %}active{% endif %}">
+    <a href="{{ url_for('transactions', type='income', category=category_filter, payment_method=payment_method_filter, date=date_filter) }}" class="filter-chip {% if type_filter == 'income' %}active{% endif %}">
         <i class="fas fa-arrow-down"></i> Pemasukan
     </a>
-    <a href="{{ url_for('transactions', type='expense') }}" class="filter-chip {% if type_filter == 'expense' %}active{% endif %}">
+    <a href="{{ url_for('transactions', type='expense', category=category_filter, payment_method=payment_method_filter, date=date_filter) }}" class="filter-chip {% if type_filter == 'expense' %}active{% endif %}">
         <i class="fas fa-arrow-up"></i> Pengeluaran
     </a>
 
-    <select class="form-control filter-category-select"
-            onchange="window.location.href='{{ url_for('transactions') }}?type={{ type_filter }}&category=' + this.value">
+    <select class="form-control filter-select" id="filter_category" onchange="updateFilters()">
         <option value="0">Semua Kategori</option>
         {% for cat in categories %}
         <option value="{{ cat.id }}" {% if cat.id == category_filter %}selected{% endif %}>{{ cat.name }}</option>
         {% endfor %}
     </select>
+    
+    <select class="form-control filter-select" id="filter_payment_method" onchange="updateFilters()">
+        <option value="all">Semua Metode</option>
+        <option value="Tunai" {% if payment_method_filter == 'Tunai' %}selected{% endif %}>Tunai</option>
+        <option value="M-Banking" {% if payment_method_filter == 'M-Banking' %}selected{% endif %}>M-Banking</option>
+    </select>
+    
+    <input type="date" class="form-control filter-select" id="filter_date" value="{{ date_filter }}" onchange="updateFilters()">
+    {% if date_filter %}
+    <button class="btn btn-ghost btn-sm" onclick="clearDateFilter()" style="padding: 0 8px; color: var(--accent-red);" title="Hapus Filter Tanggal">
+        <i class="fas fa-times"></i>
+    </button>
+    {% endif %}
 </div>
+
+<script>
+function updateFilters() {
+    const category = document.getElementById('filter_category').value;
+    const payment = document.getElementById('filter_payment_method').value;
+    const date = document.getElementById('filter_date').value;
+    window.location.href = `{{ url_for('transactions') }}?type={{ type_filter }}&category=${category}&payment_method=${payment}&date=${date}`;
+}
+function clearDateFilter() {
+    document.getElementById('filter_date').value = '';
+    updateFilters();
+}
+</script>
 
 <!-- Transaction Content -->
 <div class="card">
@@ -63,6 +88,7 @@
                                     <i class="{{ t.category.icon if t.category else ('fas fa-arrow-down' if t.type == 'income' else 'fas fa-arrow-up') }}"></i>
                                 </div>
                                 <span style="font-weight: 500;">{{ t.description or 'Tanpa deskripsi' }}</span>
+                                <span class="badge" style="font-size: 10px; padding: 2px 6px; background: rgba(108, 92, 231, 0.1); color: var(--primary);">{{ t.payment_method }}</span>
                             </div>
                         </td>
                         <td>
@@ -113,7 +139,10 @@
                         <i class="{{ t.category.icon if t.category else ('fas fa-arrow-down' if t.type == 'income' else 'fas fa-arrow-up') }}"></i>
                     </div>
                     <div class="mobile-tc-info">
-                        <div class="mobile-tc-desc">{{ t.description or 'Tanpa deskripsi' }}</div>
+                        <div class="mobile-tc-desc" style="display: flex; flex-direction: column; gap: 4px;">
+                            <span>{{ t.description or 'Tanpa deskripsi' }}</span>
+                            <span class="badge" style="font-size: 10px; width: fit-content; padding: 2px 6px; background: rgba(108, 92, 231, 0.1); color: var(--primary);">{{ t.payment_method }}</span>
+                        </div>
                         <div class="mobile-tc-cat">
                             {% if t.category %}
                             <span class="cat-dot" style="background: {{ t.category.color }};"></span>
@@ -159,14 +188,14 @@
         {% if transactions.pages > 1 %}
         <div class="pagination" style="padding: 16px;">
             {% if transactions.has_prev %}
-            <a href="{{ url_for('transactions', page=transactions.prev_num, type=type_filter, category=category_filter) }}" class="page-link">
+            <a href="{{ url_for('transactions', page=transactions.prev_num, type=type_filter, category=category_filter, payment_method=payment_method_filter, date=date_filter) }}" class="page-link">
                 <i class="fas fa-chevron-left"></i>
             </a>
             {% endif %}
 
             {% for p in transactions.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
                 {% if p %}
-                <a href="{{ url_for('transactions', page=p, type=type_filter, category=category_filter) }}"
+                <a href="{{ url_for('transactions', page=p, type=type_filter, category=category_filter, payment_method=payment_method_filter, date=date_filter) }}"
                    class="page-link {% if p == transactions.page %}active{% endif %}">{{ p }}</a>
                 {% else %}
                 <span class="page-link disabled">…</span>
@@ -174,7 +203,7 @@
             {% endfor %}
 
             {% if transactions.has_next %}
-            <a href="{{ url_for('transactions', page=transactions.next_num, type=type_filter, category=category_filter) }}" class="page-link">
+            <a href="{{ url_for('transactions', page=transactions.next_num, type=type_filter, category=category_filter, payment_method=payment_method_filter, date=date_filter) }}" class="page-link">
                 <i class="fas fa-chevron-right"></i>
             </a>
             {% endif %}

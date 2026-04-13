@@ -414,9 +414,13 @@ button, input, select, textarea {
 /* ─── Stat Cards ──────────────────────────────────────────────────────────── */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
     gap: 20px;
     margin-bottom: 28px;
+}
+
+.savings-stats {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
 }
 
 .stat-card {
@@ -692,7 +696,7 @@ button, input, select, textarea {
 /* ─── Savings Cards ───────────────────────────────────────────────────────── */
 .savings-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
     gap: 20px;
     margin-bottom: 28px;
 }

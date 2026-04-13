@@ -78,6 +78,7 @@ class Transaction(db.Model):
     type = db.Column(db.String(20), nullable=False)  # 'income' or 'expense'
     description = db.Column(db.String(200))
     date = db.Column(db.Date, nullable=False, default=date.today)
+    payment_method = db.Column(db.String(20), nullable=False, default='Tunai') # 'Tunai' or 'M-Banking'
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -463,6 +464,8 @@ def transactions():
     page = request.args.get('page', 1, type=int)
     type_filter = request.args.get('type', 'all')
     category_filter = request.args.get('category', 0, type=int)
+    payment_method_filter = request.args.get('payment_method', 'all')
+    date_filter = request.args.get('date', '')
 
     query = Transaction.query.filter_by(user_id=current_user.id)
 
@@ -470,6 +473,14 @@ def transactions():
         query = query.filter_by(type=type_filter)
     if category_filter > 0:
         query = query.filter_by(category_id=category_filter)
+    if payment_method_filter in ('Tunai', 'M-Banking'):
+        query = query.filter_by(payment_method=payment_method_filter)
+    if date_filter:
+        try:
+            filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
+            query = query.filter_by(date=filter_date)
+        except ValueError:
+            pass
 
     transactions = query.order_by(
         Transaction.date.desc(), Transaction.created_at.desc()
@@ -481,7 +492,9 @@ def transactions():
                            transactions=transactions,
                            categories=categories,
                            type_filter=type_filter,
-                           category_filter=category_filter)
+                           category_filter=category_filter,
+                           payment_method_filter=payment_method_filter,
+                           date_filter=date_filter)
 
 
 @app.route('/transaction/add', methods=['GET', 'POST'])
@@ -493,6 +506,7 @@ def add_transaction():
         description = request.form.get('description', '').strip()
         category_id = request.form.get('category_id', 0, type=int)
         trans_date = request.form.get('date', '')
+        payment_method = request.form.get('payment_method', 'Tunai')
 
         if amount <= 0:
             flash('Jumlah harus lebih dari 0.', 'danger')
@@ -509,6 +523,7 @@ def add_transaction():
             description=description,
             category_id=category_id if category_id > 0 else None,
             date=trans_date,
+            payment_method=payment_method,
             user_id=current_user.id
         )
         db.session.add(transaction)
@@ -538,6 +553,7 @@ def edit_transaction(id):
         transaction.description = request.form.get('description', '').strip()
         category_id = request.form.get('category_id', 0, type=int)
         transaction.category_id = category_id if category_id > 0 else None
+        transaction.payment_method = request.form.get('payment_method', transaction.payment_method)
 
         try:
             transaction.date = datetime.strptime(request.form.get('date', ''), '%Y-%m-%d').date()

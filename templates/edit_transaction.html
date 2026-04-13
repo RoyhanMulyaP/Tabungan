@@ -56,6 +56,14 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="form-label" for="payment_method">Metode</label>
+                        <select class="form-control" id="payment_method" name="payment_method">
+                            <option value="Tunai" {% if transaction.payment_method == 'Tunai' %}selected{% endif %}>Tunai</option>
+                            <option value="M-Banking" {% if transaction.payment_method == 'M-Banking' %}selected{% endif %}>M-Banking</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
                         <label class="form-label" for="date">Tanggal</label>
                         <input type="date" class="form-control" id="date" name="date"
                                value="{{ transaction.date.strftime('%Y-%m-%d') }}">
