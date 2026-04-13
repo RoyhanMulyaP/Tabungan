@@ -5,6 +5,7 @@ Flask-based Financial Management Application
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, date
@@ -12,6 +13,10 @@ from functools import wraps
 import os
 import json
 import calendar
+from dotenv import load_dotenv
+
+# Load env variables from .env file
+load_dotenv()
 
 # ─── App Configuration ───────────────────────────────────────────────────────
 
@@ -27,6 +32,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Silakan login terlebih dahulu.'
