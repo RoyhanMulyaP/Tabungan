@@ -5,7 +5,7 @@
 <div class="page-header">
     <div>
         <h1>Tambah <span>Transaksi</span></h1>
-        <p class="page-subtitle">Catat pemasukan atau pengeluaran baru</p>
+        <p class="page-subtitle">Catat pemasukan atau pengeluaran baru Anda</p>
     </div>
     <a href="{{ url_for('transactions') }}" class="btn btn-outline">
         <i class="fas fa-arrow-left"></i> Kembali
@@ -29,15 +29,18 @@
 
                 <div class="form-group">
                     <label class="form-label" for="amount">
-                        Jumlah (Rp) <span class="required">*</span>
+                        <i class="fas fa-money-bill-wave" style="margin-right: 6px; color: var(--accent-green);"></i>Jumlah (Rp) <span class="required">*</span>
                     </label>
                     <input type="number" class="form-control amount-input" id="amount" name="amount"
-                           placeholder="0" required min="1" step="any" inputmode="numeric">
+                           placeholder="0" required min="1" step="any" inputmode="numeric" 
+                           style="font-size: 24px; font-weight: 800; text-align: center; color: var(--accent-green);">
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label" for="category_id">Kategori</label>
+                        <label class="form-label" for="category_id">
+                            <i class="fas fa-tags" style="margin-right: 6px; color: var(--primary);"></i>Kategori
+                        </label>
                         <select class="form-control" id="category_id" name="category_id">
                             <option value="0">Pilih kategori</option>
                             <optgroup label="📥 Pemasukan" id="incomeCatGroup">
@@ -54,27 +57,33 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="payment_method">Metode</label>
+                        <label class="form-label" for="payment_method">
+                            <i class="fas fa-wallet" style="margin-right: 6px; color: var(--primary);"></i>Metode
+                        </label>
                         <select class="form-control" id="payment_method" name="payment_method">
                             <option value="Tunai">Tunai</option>
                             <option value="M-Banking">M-Banking</option>
                         </select>
                     </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="date">Tanggal</label>
-                        <input type="date" class="form-control" id="date" name="date"
-                               value="{{ today if today else '' }}">
-                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="description">Deskripsi</label>
+                    <label class="form-label" for="date">
+                        <i class="fas fa-calendar-alt" style="margin-right: 6px; color: var(--primary);"></i>Tanggal
+                    </label>
+                    <input type="date" class="form-control" id="date" name="date"
+                           value="{{ today if today else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="description">
+                        <i class="fas fa-pencil-alt" style="margin-right: 6px; color: var(--primary);"></i>Deskripsi
+                    </label>
                     <textarea class="form-control" id="description" name="description"
                               placeholder="Masukkan deskripsi transaksi (opsional)" rows="3"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 10px;">
                     <i class="fas fa-save"></i> Simpan Transaksi
                 </button>
             </form>
@@ -85,32 +94,39 @@
 
 {% block extra_js %}
 <script>
-    // Set today's date as default
-    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    // Set today's date as default if not set
+    if (!document.getElementById('date').value) {
+        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    }
 
     function setType(type) {
-        document.getElementById('transType').value = type;
+        const transType = document.getElementById('transType');
+        const amountInput = document.getElementById('amount');
         const incBtn = document.getElementById('toggleIncome');
         const expBtn = document.getElementById('toggleExpense');
         const incGroup = document.getElementById('incomeCatGroup');
         const expGroup = document.getElementById('expenseCatGroup');
         const catSelect = document.getElementById('category_id');
 
+        transType.value = type;
+
         if (type === 'income') {
             incBtn.className = 'toggle-btn active-income';
             expBtn.className = 'toggle-btn';
             incGroup.style.display = '';
             expGroup.style.display = 'none';
+            amountInput.style.color = 'var(--accent-green)';
         } else {
             incBtn.className = 'toggle-btn';
             expBtn.className = 'toggle-btn active-expense';
             incGroup.style.display = 'none';
             expGroup.style.display = '';
+            amountInput.style.color = 'var(--accent-orange)';
         }
         catSelect.value = '0';
     }
 
-    // Format number input on change
+    // Initialize formatting
     document.getElementById('amount').addEventListener('input', function(e) {
         if (this.value < 0) this.value = 0;
     });

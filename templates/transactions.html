@@ -12,37 +12,63 @@
     </a>
 </div>
 
-<!-- Filter Bar -->
-<div class="filter-bar" style="display: flex; gap: 10px; flex-wrap: wrap;">
-    <a href="{{ url_for('transactions', type='all', category=category_filter, payment_method=payment_method_filter, date=date_filter) }}" class="filter-chip {% if type_filter == 'all' %}active{% endif %}">
-        <i class="fas fa-list"></i> Semua
-    </a>
-    <a href="{{ url_for('transactions', type='income', category=category_filter, payment_method=payment_method_filter, date=date_filter) }}" class="filter-chip {% if type_filter == 'income' %}active{% endif %}">
-        <i class="fas fa-arrow-down"></i> Pemasukan
-    </a>
-    <a href="{{ url_for('transactions', type='expense', category=category_filter, payment_method=payment_method_filter, date=date_filter) }}" class="filter-chip {% if type_filter == 'expense' %}active{% endif %}">
-        <i class="fas fa-arrow-up"></i> Pengeluaran
-    </a>
+<!-- Modern Filter Header -->
+<div class="transactions-filter-container" style="margin-bottom: 24px;">
+    <!-- Type Selector Tabs -->
+    <div class="type-tabs" style="display: flex; gap: 12px; margin-bottom: 16px;">
+        <a href="{{ url_for('transactions', type='all', category=category_filter, payment_method=payment_method_filter, date=date_filter) }}" class="filter-chip {% if type_filter == 'all' %}active{% endif %}" style="padding: 8px 20px; border-radius: 20px; font-weight: 600; font-size: 14px; transition: all 0.3s; {% if type_filter == 'all' %}background: var(--primary); color: white; box-shadow: var(--shadow-sm);{% else %}background: white; color: var(--text-secondary); border: 1px solid var(--border-light);{% endif %}">
+            Semua
+        </a>
+        <a href="{{ url_for('transactions', type='income', category=category_filter, payment_method=payment_method_filter, date=date_filter) }}" class="filter-chip {% if type_filter == 'income' %}active{% endif %}" style="padding: 8px 20px; border-radius: 20px; font-weight: 600; font-size: 14px; transition: all 0.3s; {% if type_filter == 'income' %}background: var(--accent-green); color: white; box-shadow: var(--shadow-sm);{% else %}background: white; color: var(--text-secondary); border: 1px solid var(--border-light);{% endif %}">
+            Pemasukan
+        </a>
+        <a href="{{ url_for('transactions', type='expense', category=category_filter, payment_method=payment_method_filter, date=date_filter) }}" class="filter-chip {% if type_filter == 'expense' %}active{% endif %}" style="padding: 8px 20px; border-radius: 20px; font-weight: 600; font-size: 14px; transition: all 0.3s; {% if type_filter == 'expense' %}background: var(--accent-red); color: white; box-shadow: var(--shadow-sm);{% else %}background: white; color: var(--text-secondary); border: 1px solid var(--border-light);{% endif %}">
+            Pengeluaran
+        </a>
+    </div>
 
-    <select class="form-control filter-select" id="filter_category" onchange="updateFilters()">
-        <option value="0">Semua Kategori</option>
-        {% for cat in categories %}
-        <option value="{{ cat.id }}" {% if cat.id == category_filter %}selected{% endif %}>{{ cat.name }}</option>
-        {% endfor %}
-    </select>
-    
-    <select class="form-control filter-select" id="filter_payment_method" onchange="updateFilters()">
-        <option value="all">Semua Metode</option>
-        <option value="Tunai" {% if payment_method_filter == 'Tunai' %}selected{% endif %}>Tunai</option>
-        <option value="M-Banking" {% if payment_method_filter == 'M-Banking' %}selected{% endif %}>M-Banking</option>
-    </select>
-    
-    <input type="date" class="form-control filter-select" id="filter_date" value="{{ date_filter }}" onchange="updateFilters()">
-    {% if date_filter %}
-    <button class="btn btn-ghost btn-sm" onclick="clearDateFilter()" style="padding: 0 8px; color: var(--accent-red);" title="Hapus Filter Tanggal">
-        <i class="fas fa-times"></i>
-    </button>
-    {% endif %}
+    <!-- Advanced Filters -->
+    <div class="advanced-filters" style="background: white; border-radius: 16px; padding: 16px; box-shadow: var(--shadow-sm); display: flex; flex-wrap: wrap; gap: 16px; align-items: center; border: 1px solid var(--border-light);">
+        
+        <div style="font-weight: 600; font-size: 14px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--primary-glow); color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-filter"></i>
+            </div>
+        </div>
+
+        <div class="filter-group" style="flex: 1; min-width: 180px; position: relative;">
+            <i class="fas fa-tags" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"></i>
+            <select class="form-control" id="filter_category" onchange="updateFilters()" style="width: 100%; padding-left: 40px; height: 44px; border-radius: 10px; border: 1px solid var(--border-input); background-color: var(--bg-main); font-size: 14px; color: var(--text-primary); cursor: pointer; appearance: none;">
+                <option value="0">Kategori (Semua)</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if cat.id == category_filter %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+            <i class="fas fa-chevron-down" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; font-size: 12px;"></i>
+        </div>
+        
+        <div class="filter-group" style="flex: 1; min-width: 180px; position: relative;">
+            <i class="fas fa-wallet" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"></i>
+            <select class="form-control" id="filter_payment_method" onchange="updateFilters()" style="width: 100%; padding-left: 40px; height: 44px; border-radius: 10px; border: 1px solid var(--border-input); background-color: var(--bg-main); font-size: 14px; color: var(--text-primary); cursor: pointer; appearance: none;">
+                <option value="all">Metode (Semua)</option>
+                <option value="Tunai" {% if payment_method_filter == 'Tunai' %}selected{% endif %}>Tunai</option>
+                <option value="M-Banking" {% if payment_method_filter == 'M-Banking' %}selected{% endif %}>M-Banking</option>
+            </select>
+            <i class="fas fa-chevron-down" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; font-size: 12px;"></i>
+        </div>
+        
+        <div class="filter-group" style="flex: 1; min-width: 200px; display: flex; align-items: center;">
+            <div style="position: relative; flex: 1;">
+                <i class="fas fa-calendar-alt" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"></i>
+                <input type="date" class="form-control" id="filter_date" value="{{ date_filter }}" onchange="updateFilters()" style="width: 100%; padding-left: 40px; height: 44px; border-radius: {% if date_filter %}10px 0 0 10px{% else %}10px{% endif %}; border: 1px solid var(--border-input); background-color: var(--bg-main); font-size: 14px; color: var(--text-primary); cursor: pointer; border-right: {% if date_filter %}none{% else %}1px solid var(--border-input){% endif %};">
+            </div>
+            {% if date_filter %}
+            <button class="btn" onclick="clearDateFilter()" style="height: 44px; padding: 0 16px; border-radius: 0 10px 10px 0; background-color: var(--bg-main); border: 1px solid var(--border-input); border-left: none; color: var(--accent-red); transition: background 0.2s;" title="Hapus Filter Tanggal" onmouseover="this.style.background='var(--primary-glow)'" onmouseout="this.style.background='var(--bg-main)'">
+                <i class="fas fa-times"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
 <script>
@@ -71,6 +97,7 @@ function clearDateFilter() {
                         <th>Tanggal</th>
                         <th>Deskripsi</th>
                         <th>Kategori</th>
+                        <th>Metode</th>
                         <th>Tipe</th>
                         <th style="text-align: right;">Jumlah</th>
                         <th style="text-align: center;">Aksi</th>
@@ -80,26 +107,31 @@ function clearDateFilter() {
                     {% for t in transactions.items %}
                     <tr>
                         <td>
-                            <span style="font-weight: 600; font-size: 13px;">{{ t.date|date_format }}</span>
+                            <span class="table-date">{{ t.date|date_format }}</span>
                         </td>
                         <td>
-                            <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="table-desc-cell">
                                 <div class="transaction-icon {{ t.type }}" style="width: 34px; height: 34px; font-size: 13px;">
                                     <i class="{{ t.category.icon if t.category else ('fas fa-arrow-down' if t.type == 'income' else 'fas fa-arrow-up') }}"></i>
                                 </div>
-                                <span style="font-weight: 500;">{{ t.description or 'Tanpa deskripsi' }}</span>
-                                <span class="badge" style="font-size: 10px; padding: 2px 6px; background: rgba(108, 92, 231, 0.1); color: var(--primary);">{{ t.payment_method }}</span>
+                                <span class="table-desc-text">{{ t.description or 'Tanpa deskripsi' }}</span>
                             </div>
                         </td>
                         <td>
                             {% if t.category %}
-                            <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ t.category.color }};"></span>
+                            <span class="table-category-cell">
+                                <span class="cat-dot-sm" style="background: {{ t.category.color }};"></span>
                                 {{ t.category.name }}
                             </span>
                             {% else %}
-                            <span style="color: var(--text-muted);">-</span>
+                            <span class="text-muted">-</span>
                             {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge-method {% if t.payment_method == 'Tunai' %}badge-method-cash{% else %}badge-method-digital{% endif %}">
+                                <i class="fas {% if t.payment_method == 'Tunai' %}fa-money-bill-wave{% else %}fa-mobile-alt{% endif %}"></i>
+                                {{ t.payment_method }}
+                            </span>
                         </td>
                         <td>
                             <span class="badge {% if t.type == 'income' %}badge-income{% else %}badge-expense{% endif %}">
@@ -107,18 +139,18 @@ function clearDateFilter() {
                             </span>
                         </td>
                         <td style="text-align: right;">
-                            <span class="transaction-amount {{ t.type }}" style="font-size: 14px;">
+                            <span class="transaction-amount {{ t.type }}" style="font-size: 14px; font-weight: 700;">
                                 {% if t.type == 'income' %}+{% else %}-{% endif %}{{ t.amount|currency }}
                             </span>
                         </td>
                         <td style="text-align: center;">
-                            <div style="display: flex; gap: 6px; justify-content: center;">
-                                <a href="{{ url_for('edit_transaction', id=t.id) }}" class="btn btn-ghost btn-sm" data-tooltip="Edit">
+                            <div class="table-actions">
+                                <a href="{{ url_for('edit_transaction', id=t.id) }}" class="btn-action btn-action-edit" data-tooltip="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <form method="POST" action="{{ url_for('delete_transaction', id=t.id) }}" style="display: inline;"
                                       onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');">
-                                    <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--accent-red);" data-tooltip="Hapus">
+                                    <button type="submit" class="btn-action btn-action-delete" data-tooltip="Hapus">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -139,9 +171,8 @@ function clearDateFilter() {
                         <i class="{{ t.category.icon if t.category else ('fas fa-arrow-down' if t.type == 'income' else 'fas fa-arrow-up') }}"></i>
                     </div>
                     <div class="mobile-tc-info">
-                        <div class="mobile-tc-desc" style="display: flex; flex-direction: column; gap: 4px;">
-                            <span>{{ t.description or 'Tanpa deskripsi' }}</span>
-                            <span class="badge" style="font-size: 10px; width: fit-content; padding: 2px 6px; background: rgba(108, 92, 231, 0.1); color: var(--primary);">{{ t.payment_method }}</span>
+                        <div class="mobile-tc-desc">
+                            {{ t.description or 'Tanpa deskripsi' }}
                         </div>
                         <div class="mobile-tc-cat">
                             {% if t.category %}
@@ -163,11 +194,10 @@ function clearDateFilter() {
                         <i class="fas fa-calendar-alt"></i>
                         {{ t.date|short_date }}
                     </div>
-                    <div class="mobile-tc-badge">
-                        <span class="badge {% if t.type == 'income' %}badge-income{% else %}badge-expense{% endif %}">
-                            {% if t.type == 'income' %}Masuk{% else %}Keluar{% endif %}
-                        </span>
-                    </div>
+                    <span class="badge-method badge-method-sm {% if t.payment_method == 'Tunai' %}badge-method-cash{% else %}badge-method-digital{% endif %}">
+                        <i class="fas {% if t.payment_method == 'Tunai' %}fa-money-bill-wave{% else %}fa-mobile-alt{% endif %}"></i>
+                        {{ t.payment_method }}
+                    </span>
                     <div class="mobile-tc-actions">
                         <a href="{{ url_for('edit_transaction', id=t.id) }}" class="btn btn-ghost btn-sm">
                             <i class="fas fa-edit"></i>

@@ -5,7 +5,7 @@
 <div class="page-header">
     <div>
         <h1>Anggaran <span>Bulanan</span></h1>
-        <p class="page-subtitle">Atur batas pengeluaran per kategori</p>
+        <p class="page-subtitle">Kontrol pengeluaran Anda dengan target anggaran</p>
     </div>
     <div class="month-selector">
         {% set prev_month = month - 1 if month > 1 else 12 %}
@@ -22,8 +22,8 @@
     </div>
 </div>
 
-<!-- Summary -->
-<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 28px;">
+<!-- Budget Overview Stats -->
+<div class="stats-grid" style="margin-bottom: 32px;">
     <div class="stat-card balance slide-up">
         <div class="stat-icon"><i class="fas fa-bullseye"></i></div>
         <div class="stat-label">Total Anggaran</div>
@@ -45,54 +45,73 @@
     <!-- Budget List -->
     <div class="card slide-up">
         <div class="card-header">
-            <h3><i class="fas fa-list" style="color: var(--primary); margin-right: 8px;"></i>Daftar Anggaran</h3>
+            <h3><i class="fas fa-list-ul" style="color: var(--primary); margin-right: 8px;"></i>Rincian Anggaran</h3>
+            <span class="badge badge-primary">{{ budget_data|length }} Kategori</span>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="padding: 0;">
             {% if budget_data %}
-            {% for b in budget_data %}
-            <div class="budget-item">
-                <div class="budget-header">
-                    <div class="budget-category">
-                        <div class="budget-cat-icon" style="background: {{ b.color }};">
-                            <i class="{{ b.icon }}"></i>
-                        </div>
-                        {{ b.category }}
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div class="budget-amounts">
-                            <div class="budget-spent" style="color: {% if b.percent > 90 %}var(--accent-red){% elif b.percent > 70 %}var(--accent-yellow){% else %}var(--accent-green){% endif %};">
-                                {{ b.spent|currency }}
+            <div class="budget-list-modern">
+                {% for b in budget_data %}
+                <div class="budget-card-item">
+                    <div class="budget-card-header">
+                        <div class="budget-card-info">
+                            <div class="budget-card-icon" style="background: {{ b.color }};">
+                                <i class="{{ b.icon }}"></i>
                             </div>
-                            <div class="budget-limit">dari {{ b.budget|currency }}</div>
+                            <div class="budget-card-title">{{ b.category }}</div>
                         </div>
-                        <form method="POST" action="{{ url_for('delete_budget', id=b.id) }}" style="display: inline;"
-                              onsubmit="return confirm('Hapus anggaran ini?');">
-                            <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--text-muted);">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </form>
+                        <div class="budget-card-actions">
+                            <form method="POST" action="{{ url_for('delete_budget', id=b.id) }}" 
+                                   onsubmit="return confirm('Hapus anggaran kategori {{ b.category }}?');">
+                                <button type="submit" class="btn-delete-small">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="budget-card-body">
+                        <div class="budget-values">
+                            <div class="budget-usage">
+                                <span class="usage-spent" style="color: {% if b.percent > 90 %}var(--accent-red){% elif b.percent > 75 %}var(--accent-yellow){% else %}var(--accent-green){% endif %};">
+                                    {{ b.spent|currency }}
+                                </span>
+                                <span class="usage-sep">terpakai dari</span>
+                                <span class="usage-total">{{ b.budget|currency }}</span>
+                            </div>
+                            <div class="usage-percent" style="color: {{ b.color }};">
+                                {{ "%.0f"|format(b.percent) }}%
+                            </div>
+                        </div>
+                        
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: {{ b.percent|min_val(100) }}%; background: {% if b.percent > 90 %}var(--accent-red){% elif b.percent > 75 %}var(--accent-yellow){% else %}{{ b.color }}{% endif %};"></div>
+                        </div>
+                        
+                        <div class="budget-card-footer">
+                            <div class="footer-remaining">
+                                {% if b.remaining > 0 %}
+                                Sisa: <span class="rem-val">{{ b.remaining|currency }}</span>
+                                {% else %}
+                                <span class="over-budget">Over budget {{ (b.spent - b.budget)|currency }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="budget-progress">
-                    <div class="budget-fill" style="width: {{ b.percent }}%; background: {% if b.percent > 90 %}var(--accent-red){% elif b.percent > 70 %}var(--accent-yellow){% else %}{{ b.color }}{% endif %};"></div>
-                </div>
-                <div class="budget-status">
-                    <span>{{ "%.0f"|format(b.percent) }}% terpakai</span>
-                    <span>Sisa {{ b.remaining|currency }}</span>
-                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
             {% else %}
-            <div class="empty-state" style="padding: 30px 10px;">
+            <div class="empty-state" style="padding: 60px 20px;">
                 <div class="empty-icon"><i class="fas fa-bullseye"></i></div>
-                <p>Belum ada anggaran untuk bulan ini</p>
+                <p>Belum ada anggaran untuk bulan ini.</p>
             </div>
             {% endif %}
         </div>
     </div>
 
-    <!-- Add Budget Form -->
-    <div class="card slide-up">
+    <!-- Add Budget Card -->
+    <div class="card slide-up" style="height: fit-content;">
         <div class="card-header">
             <h3><i class="fas fa-plus-circle" style="color: var(--accent-green); margin-right: 8px;"></i>Tambah Anggaran</h3>
         </div>
@@ -111,15 +130,14 @@
                     </select>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 24px;">
                     <label class="form-label" for="budget_amount">Batas Anggaran (Rp)</label>
-                    <input type="number" class="form-control" id="budget_amount" name="amount"
-                           placeholder="0" required min="1000" step="any"
-                           style="font-size: 18px; font-weight: 700; text-align: center; padding: 12px;">
+                    <input type="number" class="form-control amount-input-styled" id="budget_amount" name="amount"
+                           placeholder="0" required min="1000" step="any">
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-block">
-                    <i class="fas fa-save"></i> Simpan
+                    <i class="fas fa-save"></i> Pasang Anggaran
                 </button>
             </form>
         </div>

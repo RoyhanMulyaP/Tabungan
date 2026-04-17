@@ -5,7 +5,7 @@
 <div class="page-header">
     <div>
         <h1>Laporan <span>Keuangan</span></h1>
-        <p class="page-subtitle">Analisis keuangan tahunan Anda</p>
+        <p class="page-subtitle">Analisis mendalam aktivitas keuangan tahunan Anda</p>
     </div>
     <div class="month-selector">
         <a href="{{ url_for('reports', year=year-1) }}" class="month-btn">
@@ -18,8 +18,8 @@
     </div>
 </div>
 
-<!-- Yearly Summary -->
-<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+<!-- Yearly Summary Cards -->
+<div class="stats-grid" style="margin-bottom: 32px;">
     <div class="stat-card income slide-up">
         <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
         <div class="stat-label">Total Pemasukan {{ year }}</div>
@@ -32,62 +32,80 @@
     </div>
     <div class="stat-card balance slide-up">
         <div class="stat-icon"><i class="fas fa-balance-scale"></i></div>
-        <div class="stat-label">Saldo Tahunan</div>
+        <div class="stat-label">Saldo Bersih</div>
         <div class="stat-value count-up" data-value="{{ yearly_income - yearly_expense }}">Rp 0</div>
     </div>
 </div>
 
-<!-- Monthly Bar Chart -->
-<div class="card slide-up" style="margin-bottom: 28px;">
+<!-- Main Trend Chart -->
+<div class="card slide-up" style="margin-bottom: 32px;">
     <div class="card-header">
-        <h3><i class="fas fa-chart-bar" style="color: var(--primary); margin-right: 8px;"></i>Tren Bulanan {{ year }}</h3>
+        <h3><i class="fas fa-chart-line" style="color: var(--primary); margin-right: 8px;"></i>Tren Keuangan Bulanan</h3>
     </div>
     <div class="card-body">
-        <div class="chart-container" style="height: 350px;">
-            <canvas id="monthlyBarChart"></canvas>
+        <div class="chart-container large">
+            <canvas id="monthlyTrendChart"></canvas>
         </div>
     </div>
 </div>
 
-<!-- Pie Charts Row -->
 <div class="grid-2">
-    <!-- Income Breakdown -->
+    <!-- Category Breakdown - Pemasukan -->
     <div class="card slide-up">
         <div class="card-header">
-            <h3><i class="fas fa-chart-pie" style="color: var(--accent-green); margin-right: 8px;"></i>Pemasukan per Kategori</h3>
+            <h3><i class="fas fa-chart-pie" style="color: var(--accent-green); margin-right: 8px;"></i>Sumber Pemasukan</h3>
         </div>
         <div class="card-body">
-            <div class="chart-container" style="height: 300px;">
-                <canvas id="incomeBreakdownChart"></canvas>
+            <div class="chart-container">
+                <canvas id="incomePieChartReport"></canvas>
             </div>
-            <div id="incomeBdLegend" class="chart-legend"></div>
+            <div id="incomeLegendReport" class="chart-legend-grid"></div>
         </div>
     </div>
 
-    <!-- Expense Breakdown -->
+    <!-- Category Breakdown - Pengeluaran -->
     <div class="card slide-up">
         <div class="card-header">
-            <h3><i class="fas fa-chart-pie" style="color: var(--accent-orange); margin-right: 8px;"></i>Pengeluaran per Kategori</h3>
+            <h3><i class="fas fa-chart-pie" style="color: var(--accent-orange); margin-right: 8px;"></i>Alokasi Pengeluaran</h3>
         </div>
         <div class="card-body">
-            <div class="chart-container" style="height: 300px;">
-                <canvas id="expenseBreakdownChart"></canvas>
+            <div class="chart-container">
+                <canvas id="expensePieChartReport"></canvas>
             </div>
-            <div id="expenseBdLegend" class="chart-legend"></div>
+            <div id="expenseLegendReport" class="chart-legend-grid"></div>
         </div>
     </div>
 </div>
 
-<!-- Income vs Expense Comparison -->
-<div class="card slide-up" style="margin-bottom: 28px;">
+<!-- Composition Chart -->
+<div class="card slide-up" style="margin-top: 32px; margin-bottom: 32px;">
     <div class="card-header">
-        <h3><i class="fas fa-balance-scale-right" style="color: var(--primary); margin-right: 8px;"></i>Perbandingan Pemasukan vs Pengeluaran</h3>
+        <h3><i class="fas fa-balance-scale-right" style="color: var(--primary); margin-right: 8px;"></i>Rasio Pemasukan vs Pengeluaran</h3>
     </div>
     <div class="card-body">
-        <div class="chart-container" style="height: 300px;">
-            <canvas id="comparisonPieChart"></canvas>
+        <div class="composition-container">
+            <div class="chart-container mini">
+                <canvas id="compPieChartReport"></canvas>
+            </div>
+            <div class="comp-details">
+                <div class="comp-item">
+                    <div class="comp-marker" style="background: var(--accent-green);"></div>
+                    <div class="comp-info">
+                        <span class="comp-label">Pemasukan</span>
+                        <span class="comp-val">{{ yearly_income|currency }}</span>
+                    </div>
+                    <div class="comp-pct" id="incPct">0%</div>
+                </div>
+                <div class="comp-item">
+                    <div class="comp-marker" style="background: var(--accent-orange);"></div>
+                    <div class="comp-info">
+                        <span class="comp-label">Pengeluaran</span>
+                        <span class="comp-val">{{ yearly_expense|currency }}</span>
+                    </div>
+                    <div class="comp-pct" id="expPct">0%</div>
+                </div>
+            </div>
         </div>
-        <div id="comparisonLegend" class="chart-legend" style="justify-content: center;"></div>
     </div>
 </div>
 {% endblock %}
@@ -95,6 +113,7 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Global Defaults
     Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
     Chart.defaults.font.weight = 500;
     Chart.defaults.color = '#636E72';
@@ -106,63 +125,73 @@ document.addEventListener('DOMContentLoaded', function() {
     const months = {{ months_id|tojson }};
     const monthLabels = Object.values(months);
 
-    // ─── Monthly Bar Chart ───────────────────────────────────────────────
-    const barCtx = document.getElementById('monthlyBarChart').getContext('2d');
-    new Chart(barCtx, {
-        type: 'bar',
+    // 1. Monthly Trend Chart (Area Chart)
+    const trendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+    
+    const incGrad = trendCtx.createLinearGradient(0, 0, 0, 400);
+    incGrad.addColorStop(0, 'rgba(0, 184, 148, 0.2)');
+    incGrad.addColorStop(1, 'rgba(0, 184, 148, 0)');
+
+    const expGrad = trendCtx.createLinearGradient(0, 0, 0, 400);
+    expGrad.addColorStop(0, 'rgba(225, 112, 85, 0.2)');
+    expGrad.addColorStop(1, 'rgba(225, 112, 85, 0)');
+
+    new Chart(trendCtx, {
+        type: 'line',
         data: {
             labels: monthLabels,
             datasets: [
                 {
                     label: 'Pemasukan',
                     data: monthlyData.map(d => d.total_income),
-                    backgroundColor: 'rgba(0, 184, 148, 0.75)',
                     borderColor: '#00B894',
-                    borderWidth: 2,
-                    borderRadius: 6,
-                    borderSkipped: false
+                    backgroundColor: incGrad,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#FFF',
+                    pointBorderColor: '#00B894',
+                    pointBorderWidth: 2
                 },
                 {
                     label: 'Pengeluaran',
                     data: monthlyData.map(d => d.total_expense),
-                    backgroundColor: 'rgba(225, 112, 85, 0.75)',
                     borderColor: '#E17055',
-                    borderWidth: 2,
-                    borderRadius: 6,
-                    borderSkipped: false
+                    backgroundColor: expGrad,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#FFF',
+                    pointBorderColor: '#E17055',
+                    pointBorderWidth: 2
                 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
             scales: {
-                x: {
-                    grid: { display: false },
-                    border: { display: false }
-                },
+                x: { grid: { display: false }, border: { display: false } },
                 y: {
-                    grid: { color: 'rgba(0,0,0,0.04)' },
+                    grid: { color: 'rgba(0,0,0,0.03)' },
+                    border: { display: false },
                     ticks: {
-                        callback: function(value) {
-                            if (value >= 1000000) return (value / 1000000).toFixed(1) + 'jt';
-                            if (value >= 1000) return (value / 1000).toFixed(0) + 'rb';
-                            return value;
+                        callback: function(v) {
+                            if (v >= 1000000) return (v / 1000000).toFixed(1) + 'jt';
+                            if (v >= 1000) return (v / 1000).toFixed(0) + 'rb';
+                            return v;
                         }
-                    },
-                    border: { display: false }
+                    }
                 }
             },
             plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: { usePointStyle: true, pointStyle: 'rectRounded', padding: 20, font: { size: 12, weight: 600 } }
-                },
                 tooltip: {
-                    backgroundColor: 'rgba(45, 52, 54, 0.9)',
-                    titleFont: { size: 13, weight: 700 },
-                    bodyFont: { size: 12 },
+                    backgroundColor: 'rgba(26, 29, 46, 0.9)',
                     padding: 12,
                     cornerRadius: 10,
                     callbacks: {
@@ -171,15 +200,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                 }
-            },
-            animation: { duration: 1200, easing: 'easeOutQuart' }
+            }
         }
     });
 
-    // ─── Income Breakdown Pie ────────────────────────────────────────────
-    const incBdCtx = document.getElementById('incomeBreakdownChart').getContext('2d');
+    // 2. Income Pie
+    const incPieCtx = document.getElementById('incomePieChartReport').getContext('2d');
     if (incomeBreakdown.length > 0) {
-        new Chart(incBdCtx, {
+        new Chart(incPieCtx, {
             type: 'doughnut',
             data: {
                 labels: incomeBreakdown.map(d => d.name),
@@ -194,11 +222,12 @@ document.addEventListener('DOMContentLoaded', function() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '60%',
+                cutout: '65%',
                 plugins: {
                     tooltip: {
-                        backgroundColor: 'rgba(45, 52, 54, 0.9)',
-                        padding: 12, cornerRadius: 10,
+                        backgroundColor: 'rgba(26, 29, 46, 0.9)',
+                        padding: 12,
+                        cornerRadius: 10,
                         callbacks: {
                             label: function(ctx) {
                                 const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
@@ -207,24 +236,24 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         }
                     }
-                },
-                animation: { animateRotate: true, animateScale: true, duration: 1200 }
+                }
             }
         });
-        const incTotal = incomeBreakdown.reduce((sum, d) => sum + d.value, 0);
-        const incLeg = document.getElementById('incomeBdLegend');
+        
+        const total = incomeBreakdown.reduce((s, d) => s + d.value, 0);
+        const legend = document.getElementById('incomeLegendReport');
         incomeBreakdown.forEach(d => {
-            const pct = ((d.value / incTotal) * 100).toFixed(1);
-            incLeg.innerHTML += `<div class="legend-item"><span class="legend-dot" style="background: ${d.color};"></span><span>${d.name} (${pct}%)</span></div>`;
+            const pct = ((d.value / total) * 100).toFixed(1);
+            legend.innerHTML += `<div class="legend-chip"><span class="chip-dot" style="background: ${d.color};"></span><span class="chip-name">${d.name}</span><span class="chip-pct">${pct}%</span></div>`;
         });
     } else {
-        incBdCtx.canvas.parentElement.innerHTML = '<div class="chart-empty"><i class="fas fa-chart-pie"></i><p>Belum ada data pemasukan tahun ini</p></div>';
+        incPieCtx.canvas.parentElement.innerHTML = '<div class="chart-empty small"><p>Tidak ada data pemasukan</p></div>';
     }
 
-    // ─── Expense Breakdown Pie ───────────────────────────────────────────
-    const expBdCtx = document.getElementById('expenseBreakdownChart').getContext('2d');
+    // 3. Expense Pie
+    const expPieCtx = document.getElementById('expensePieChartReport').getContext('2d');
     if (expenseBreakdown.length > 0) {
-        new Chart(expBdCtx, {
+        new Chart(expPieCtx, {
             type: 'doughnut',
             data: {
                 labels: expenseBreakdown.map(d => d.name),
@@ -239,11 +268,12 @@ document.addEventListener('DOMContentLoaded', function() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '60%',
+                cutout: '65%',
                 plugins: {
                     tooltip: {
-                        backgroundColor: 'rgba(45, 52, 54, 0.9)',
-                        padding: 12, cornerRadius: 10,
+                        backgroundColor: 'rgba(26, 29, 46, 0.9)',
+                        padding: 12,
+                        cornerRadius: 10,
                         callbacks: {
                             label: function(ctx) {
                                 const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
@@ -252,32 +282,32 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         }
                     }
-                },
-                animation: { animateRotate: true, animateScale: true, duration: 1200 }
+                }
             }
         });
-        const expTotal = expenseBreakdown.reduce((sum, d) => sum + d.value, 0);
-        const expLeg = document.getElementById('expenseBdLegend');
+        
+        const total = expenseBreakdown.reduce((s, d) => s + d.value, 0);
+        const legend = document.getElementById('expenseLegendReport');
         expenseBreakdown.forEach(d => {
-            const pct = ((d.value / expTotal) * 100).toFixed(1);
-            expLeg.innerHTML += `<div class="legend-item"><span class="legend-dot" style="background: ${d.color};"></span><span>${d.name} (${pct}%)</span></div>`;
+            const pct = ((d.value / total) * 100).toFixed(1);
+            legend.innerHTML += `<div class="legend-chip"><span class="chip-dot" style="background: ${d.color};"></span><span class="chip-name">${d.name}</span><span class="chip-pct">${pct}%</span></div>`;
         });
     } else {
-        expBdCtx.canvas.parentElement.innerHTML = '<div class="chart-empty"><i class="fas fa-chart-pie"></i><p>Belum ada data pengeluaran tahun ini</p></div>';
+        expPieCtx.canvas.parentElement.innerHTML = '<div class="chart-empty small"><p>Tidak ada data pengeluaran</p></div>';
     }
 
-    // ─── Comparison Pie ──────────────────────────────────────────────────
-    const compCtx = document.getElementById('comparisonPieChart').getContext('2d');
-    const yearlyIncome = {{ yearly_income }};
-    const yearlyExpense = {{ yearly_expense }};
-
-    if (yearlyIncome > 0 || yearlyExpense > 0) {
+    // 4. Comparison Chart
+    const compCtx = document.getElementById('compPieChartReport').getContext('2d');
+    const yInc = {{ yearly_income }};
+    const yExp = {{ yearly_expense }};
+    
+    if (yInc > 0 || yExp > 0) {
         new Chart(compCtx, {
             type: 'pie',
             data: {
                 labels: ['Pemasukan', 'Pengeluaran'],
                 datasets: [{
-                    data: [yearlyIncome, yearlyExpense],
+                    data: [yInc, yExp],
                     backgroundColor: ['#00B894', '#E17055'],
                     borderWidth: 4,
                     borderColor: '#FFFFFF',
@@ -289,29 +319,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 maintainAspectRatio: false,
                 plugins: {
                     tooltip: {
-                        backgroundColor: 'rgba(45, 52, 54, 0.9)',
-                        padding: 12, cornerRadius: 10,
-                        callbacks: {
-                            label: function(ctx) {
-                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                                const pct = ((ctx.raw / total) * 100).toFixed(1);
-                                return ` ${ctx.label}: ${formatCurrency(ctx.raw)} (${pct}%)`;
-                            }
-                        }
+                        backgroundColor: 'rgba(26, 29, 46, 0.9)',
+                        padding: 12,
+                        cornerRadius: 10
                     }
-                },
-                animation: { animateRotate: true, animateScale: true, duration: 1500 }
+                }
             }
         });
-
-        const total = yearlyIncome + yearlyExpense;
-        const compLeg = document.getElementById('comparisonLegend');
-        compLeg.innerHTML = `
-            <div class="legend-item"><span class="legend-dot" style="background: #00B894;"></span><span>Pemasukan (${((yearlyIncome/total)*100).toFixed(1)}%)</span></div>
-            <div class="legend-item"><span class="legend-dot" style="background: #E17055;"></span><span>Pengeluaran (${((yearlyExpense/total)*100).toFixed(1)}%)</span></div>
-        `;
+        
+        const total = yInc + yExp;
+        document.getElementById('incPct').textContent = ((yInc / total) * 100).toFixed(1) + '%';
+        document.getElementById('expPct').textContent = ((yExp / total) * 100).toFixed(1) + '%';
     } else {
-        compCtx.canvas.parentElement.innerHTML = '<div class="chart-empty"><i class="fas fa-chart-pie"></i><p>Belum ada data keuangan tahun ini</p></div>';
+        compCtx.canvas.parentElement.innerHTML = '<div class="chart-empty small"><p>Tidak ada data keuangan</p></div>';
     }
 });
 </script>
