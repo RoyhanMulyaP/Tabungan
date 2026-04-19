@@ -85,7 +85,7 @@
                         </div>
                         
                         <div class="progress-bar-container">
-                            <div class="progress-bar-fill" style="width: {{ b.percent|min_val(100) }}%; background: {% if b.percent > 90 %}var(--accent-red){% elif b.percent > 75 %}var(--accent-yellow){% else %}{{ b.color }}{% endif %};"></div>
+                            <div class="progress-bar-fill" style="width: {{ b.percent }}%; background: {% if b.percent > 90 %}var(--accent-red){% elif b.percent > 75 %}var(--accent-yellow){% else %}{{ b.color }}{% endif %};"></div>
                         </div>
                         
                         <div class="budget-card-footer">

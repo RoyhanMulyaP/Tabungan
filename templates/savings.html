@@ -13,35 +13,70 @@
 </div>
 
 {% if savings_goals %}
+<!-- Summary Stats -->
+<div class="stats-grid savings-stats slide-up">
+    <div class="stat-card savings">
+        <div class="stat-icon"><i class="fas fa-piggy-bank"></i></div>
+        <div class="stat-label">Total Target</div>
+        <div class="stat-value">{{ savings_goals|length }}</div>
+    </div>
+    <div class="stat-card income">
+        <div class="stat-icon"><i class="fas fa-coins"></i></div>
+        <div class="stat-label">Terkumpul</div>
+        <div class="stat-value">{{ total_saved|currency }}</div>
+    </div>
+    <div class="stat-card balance">
+        <div class="stat-icon"><i class="fas fa-bullseye"></i></div>
+        <div class="stat-label">Total Target</div>
+        <div class="stat-value">{{ total_target|currency }}</div>
+    </div>
+</div>
+
+<!-- Savings Cards Grid -->
 <div class="savings-grid">
     {% for goal in savings_goals %}
-    <a href="{{ url_for('savings_detail', id=goal.id) }}" class="savings-card slide-up stagger-{{ loop.index }}">
-        <div class="savings-card-header">
-            <div class="savings-icon" style="background: {{ goal.color }};">
-                <i class="{{ goal.icon }}"></i>
-            </div>
-            <div class="savings-badge" style="background: {{ goal.color }}20; color: {{ goal.color }};">
-                {{ "%.0f"|format(goal.progress_percent) }}%
-            </div>
-        </div>
+    <a href="{{ url_for('savings_detail', id=goal.id) }}" class="savings-card slide-up stagger-{{ loop.index }}" id="savings-card-{{ goal.id }}">
+        <!-- Colored accent bar at top -->
+        <div class="savings-card-accent" style="background: linear-gradient(135deg, {{ goal.color }}, {{ goal.color }}99);"></div>
         
-        <div class="savings-card-content">
-            <h3 class="savings-name">{{ goal.name }}</h3>
-            <div class="savings-amount">
-                <span class="savings-current">{{ goal.current_amount|currency }}</span>
-                <span class="savings-divider">/</span>
-                <span class="savings-target">{{ goal.target_amount|currency }}</span>
+        <div class="savings-card-inner">
+            <div class="savings-card-header">
+                <div class="savings-icon" style="background: {{ goal.color }};">
+                    <i class="{{ goal.icon }}"></i>
+                </div>
+                <div class="savings-badge {% if goal.progress_percent >= 100 %}completed{% endif %}" style="background: {{ goal.color }}15; color: {{ goal.color }};">
+                    {% if goal.progress_percent >= 100 %}
+                    <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                    {{ "%.0f"|format(goal.progress_percent) }}%
+                </div>
             </div>
             
-            <div class="progress-bar-container" style="margin: 16px 0 8px;">
-                <div class="progress-bar-fill" style="width: {{ goal.progress_percent }}%; background: {{ goal.color }};"></div>
-            </div>
-            
-            <div class="savings-meta">
-                <span class="savings-remaining">Sisa {{ goal.remaining|currency }}</span>
-                {% if goal.deadline %}
-                <span class="savings-deadline"><i class="far fa-calendar-alt"></i> {{ goal.deadline|date_format }}</span>
-                {% endif %}
+            <div class="savings-card-content">
+                <h3 class="savings-name">{{ goal.name }}</h3>
+                <div class="savings-amount">
+                    <span class="savings-current" style="color: {{ goal.color }};">{{ goal.current_amount|currency }}</span>
+                    <span class="savings-divider">/</span>
+                    <span class="savings-target">{{ goal.target_amount|currency }}</span>
+                </div>
+                
+                <div class="savings-progress-wrap">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: {{ goal.progress_percent }}%; background: linear-gradient(90deg, {{ goal.color }}, {{ goal.color }}CC);"></div>
+                    </div>
+                </div>
+                
+                <div class="savings-meta">
+                    <span class="savings-remaining">
+                        <i class="fas fa-arrow-down"></i>
+                        Sisa {{ goal.remaining|currency }}
+                    </span>
+                    {% if goal.deadline %}
+                    <span class="savings-deadline">
+                        <i class="far fa-calendar-alt"></i> {{ goal.deadline|date_format }}
+                    </span>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </a>

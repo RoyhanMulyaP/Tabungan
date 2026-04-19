@@ -52,7 +52,7 @@
         </div>
 
         <div class="progress-bar-container large-progress">
-            <div class="progress-bar-fill" style="width: {{ goal.progress_percent }}%; background: {{ goal.color }};"></div>
+            <div class="progress-bar-fill" style="width: {{ goal.progress_percent }}%; background: linear-gradient(90deg, {{ goal.color }}, {{ goal.color }}CC);"></div>
         </div>
 
         <div class="detail-footer">
@@ -105,7 +105,7 @@
             <h3><i class="fas fa-history" style="color: var(--primary); margin-right: 8px;"></i>Riwayat Setoran</h3>
             <span class="badge badge-primary">{{ deposits|length }} setoran</span>
         </div>
-        <div class="card-body" style="max-height: 400px; overflow-y: auto; padding: 0;">
+        <div class="card-body detail-history-body">
             {% if deposits %}
             <div class="detail-list">
                 {% for d in deposits %}

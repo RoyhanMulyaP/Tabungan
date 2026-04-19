@@ -598,7 +598,7 @@ def savings():
     goals = SavingsGoal.query.filter_by(user_id=current_user.id).order_by(SavingsGoal.created_at.desc()).all()
     total_saved = sum(g.current_amount for g in goals)
     total_target = sum(g.target_amount for g in goals)
-    return render_template('savings.html', goals=goals, total_saved=total_saved, total_target=total_target)
+    return render_template('savings.html', savings_goals=goals, total_saved=total_saved, total_target=total_target)
 
 
 @app.route('/savings/add', methods=['GET', 'POST'])

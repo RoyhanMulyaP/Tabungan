@@ -18,7 +18,7 @@
             <form method="POST" action="{{ url_for('add_savings_goal') }}">
                 <div class="form-group">
                     <label class="form-label" for="name">
-                        <i class="fas fa-bullseye" style="margin-right: 6px; color: var(--primary);"></i>Nama Target <span class="required">*</span>
+                        <i style="margin-right: 6px; color: var(--primary);"></i>Nama Target <span class="required">*</span>
                     </label>
                     <input type="text" class="form-control" id="name" name="name"
                            placeholder="Contoh: Dana Darurat, Liburan Jepang, MacBook Pro" required>
@@ -26,7 +26,7 @@
 
                 <div class="form-group">
                     <label class="form-label" for="target_amount">
-                        <i class="fas fa-coins" style="margin-right: 6px; color: var(--accent-yellow);"></i>Jumlah Target (Rp) <span class="required">*</span>
+                        <i style="margin-right: 6px; color: var(--accent-yellow);"></i>Jumlah Target (Rp) <span class="required">*</span>
                     </label>
                     <input type="number" class="form-control amount-input-styled" id="target_amount" name="target_amount"
                            placeholder="0" required min="1000" step="any">
@@ -34,7 +34,7 @@
 
                 <div class="form-group" style="margin-bottom: 24px;">
                     <label class="form-label" for="deadline">
-                        <i class="fas fa-calendar-alt" style="margin-right: 6px; color: var(--primary);"></i>Batas Waktu (opsional)
+                        <i style="margin-right: 6px; color: var(--primary);"></i>Batas Waktu (opsional)
                     </label>
                     <input type="date" class="form-control" id="deadline" name="deadline">
                     <p class="form-hint" style="margin-top: 6px; font-size: 12px; color: var(--text-muted);">
@@ -44,7 +44,7 @@
 
                 <div class="form-group">
                     <label class="form-label">
-                        <i class="fas fa-palette" style="margin-right: 6px; color: var(--primary);"></i>Pilih Warna Tema
+                        <i style="margin-right: 6px; color: var(--primary);"></i>Pilih Warna Tema
                     </label>
                     <div class="color-picker-grid">
                         {% set colors = ['#00B894', '#00CEC9', '#0984E3', '#6C5CE7', '#A29BFE', '#FD79A8', '#E17055', '#FDCB6E', '#55EFC4', '#74B9FF', '#E84393', '#D63031'] %}
