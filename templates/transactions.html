@@ -1,6 +1,121 @@
 {% extends "base.html" %}
 {% block title %}Transaksi{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Fix Transactions Mobile Content Overflow Aggressively */
+@media (max-width: 768px) {
+    /* Prevent root overflow globally */
+    html, body {
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+    
+    .main-content {
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    .btn-add-transaction-desktop {
+        display: none !important;
+    }
+
+    .transactions-filter-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+    }
+
+    .transactions-filter-container .type-tabs {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        justify-content: flex-start;
+        width: 100% !important;
+    }
+
+    .transactions-filter-container .type-tabs .filter-chip {
+        flex: 1 1 auto;
+        text-align: center;
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        white-space: nowrap;
+        min-width: 0 !important;
+    }
+
+    .advanced-filters {
+        padding: 12px !important;
+        gap: 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .advanced-filters .filter-group {
+        min-width: 100% !important;
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .transaction-card-body {
+        padding: 16px 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .page-header {
+        margin-bottom: 20px !important;
+        width: 100% !important;
+        flex-wrap: wrap !important;
+        overflow: hidden !important;
+    }
+
+    .card {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+    }
+
+    .pagination {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 8px !important;
+    }
+
+    /* Force tables to hide explicitly or scale */
+    .data-table-desktop {
+        display: none !important;
+    }
+
+    .mobile-transaction-cards {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    .mobile-transaction-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        word-wrap: break-word !important;
+    }
+
+    .mobile-tc-desc, .mobile-tc-info, .mobile-tc-cat {
+        white-space: normal !important;
+        word-break: break-word !important;
+    }
+
+    select, input[type="date"], .form-control {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <div>
