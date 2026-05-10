@@ -31,7 +31,7 @@
                         <span class="category-item-name">{{ cat.name }}</span>
                     </div>
                     <form method="POST" action="{{ url_for('delete_category', id=cat.id) }}" 
-                           onsubmit="return confirm('Hapus kategori {{ cat.name }}?');">
+                           onsubmit="confirmDelete(event, this, 'Hapus kategori {{ cat.name }}?');">
                         <button type="submit" class="category-item-delete">
                             <i class="fas fa-times"></i>
                         </button>
@@ -65,7 +65,7 @@
                         <span class="category-item-name">{{ cat.name }}</span>
                     </div>
                     <form method="POST" action="{{ url_for('delete_category', id=cat.id) }}" 
-                           onsubmit="return confirm('Hapus kategori {{ cat.name }}?');">
+                           onsubmit="confirmDelete(event, this, 'Hapus kategori {{ cat.name }}?');">
                         <button type="submit" class="category-item-delete">
                             <i class="fas fa-times"></i>
                         </button>

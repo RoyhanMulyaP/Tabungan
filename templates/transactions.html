@@ -151,7 +151,12 @@
             </div>
         </div>
 
-        <div class="filter-group" style="flex: 1; min-width: 180px; position: relative;">
+        <div class="filter-group search-group" style="flex: 1; min-width: 200px; position: relative;">
+            <i class="fas fa-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"></i>
+            <input type="text" class="form-control" id="search_query" placeholder="Cari transaksi..." value="{{ search_query }}" onkeyup="if(event.key === 'Enter') updateFilters()" style="width: 100%; padding-left: 40px; height: 44px; border-radius: 10px; border: 1px solid var(--border-input); background-color: var(--bg-main); font-size: 14px; color: var(--text-primary);">
+        </div>
+
+        <div class="filter-group" style="flex: 1; min-width: 150px; position: relative;">
             <i class="fas fa-tags" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"></i>
             <select class="form-control" id="filter_category" onchange="updateFilters()" style="width: 100%; padding-left: 40px; height: 44px; border-radius: 10px; border: 1px solid var(--border-input); background-color: var(--bg-main); font-size: 14px; color: var(--text-primary); cursor: pointer; appearance: none;">
                 <option value="0">Kategori (Semua)</option>
@@ -188,10 +193,11 @@
 
 <script>
 function updateFilters() {
+    const search = document.getElementById('search_query') ? document.getElementById('search_query').value : '';
     const category = document.getElementById('filter_category').value;
     const payment = document.getElementById('filter_payment_method').value;
     const date = document.getElementById('filter_date').value;
-    window.location.href = `{{ url_for('transactions') }}?type={{ type_filter }}&category=${category}&payment_method=${payment}&date=${date}`;
+    window.location.href = `{{ url_for('transactions') }}?type={{ type_filter }}&search=${encodeURIComponent(search)}&category=${category}&payment_method=${payment}&date=${date}`;
 }
 function clearDateFilter() {
     document.getElementById('filter_date').value = '';
@@ -264,7 +270,7 @@ function clearDateFilter() {
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <form method="POST" action="{{ url_for('delete_transaction', id=t.id) }}" style="display: inline;"
-                                      onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');">
+                                      onsubmit="confirmDelete(event, this, 'Yakin ingin menghapus transaksi ini?');">
                                     <button type="submit" class="btn-action btn-action-delete" data-tooltip="Hapus">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -318,7 +324,7 @@ function clearDateFilter() {
                             <i class="fas fa-edit"></i>
                         </a>
                         <form method="POST" action="{{ url_for('delete_transaction', id=t.id) }}" style="display: inline;"
-                              onsubmit="return confirm('Yakin ingin menghapus transaksi ini?');">
+                              onsubmit="confirmDelete(event, this, 'Yakin ingin menghapus transaksi ini?');">
                             <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--accent-red);">
                                 <i class="fas fa-trash"></i>
                             </button>

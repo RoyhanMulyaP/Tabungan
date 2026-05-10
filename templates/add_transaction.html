@@ -28,12 +28,13 @@
                 <input type="hidden" name="type" id="transType" value="income">
 
                 <div class="form-group">
-                    <label class="form-label" for="amount">
+                    <label class="form-label" for="amount_display">
                         <i class="fas fa-money-bill-wave" style="margin-right: 6px; color: var(--accent-green);"></i>Jumlah (Rp) <span class="required">*</span>
                     </label>
-                    <input type="number" class="form-control amount-input" id="amount" name="amount"
-                           placeholder="0" required min="1" step="any" inputmode="numeric" 
+                    <input type="text" class="form-control amount-input" id="amount_display"
+                           placeholder="0" required inputmode="numeric" oninput="formatCurrency(this)"
                            style="font-size: 24px; font-weight: 800; text-align: center; color: var(--accent-green);">
+                    <input type="hidden" id="amount" name="amount">
                 </div>
 
                 <div class="form-row">
@@ -127,8 +128,23 @@
     }
 
     // Initialize formatting
-    document.getElementById('amount').addEventListener('input', function(e) {
-        if (this.value < 0) this.value = 0;
+    function formatCurrency(input) {
+        let value = input.value.replace(/\D/g, '');
+        if (value === '') {
+            input.value = '';
+            document.getElementById('amount').value = '';
+            return;
+        }
+        document.getElementById('amount').value = value;
+        input.value = parseInt(value, 10).toLocaleString('id-ID').replace(/,/g, '.');
+    }
+    
+    // Prevent submitting if amount is empty
+    document.getElementById('transactionForm').addEventListener('submit', function(e) {
+        if (!document.getElementById('amount').value) {
+            e.preventDefault();
+            alert('Jumlah tidak boleh kosong');
+        }
     });
 </script>
 {% endblock %}

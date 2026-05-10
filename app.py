@@ -472,6 +472,7 @@ def transactions():
     category_filter = request.args.get('category', 0, type=int)
     payment_method_filter = request.args.get('payment_method', 'all')
     date_filter = request.args.get('date', '')
+    search_query = request.args.get('search', '').strip()
 
     query = Transaction.query.filter_by(user_id=current_user.id)
 
@@ -487,6 +488,9 @@ def transactions():
             query = query.filter_by(date=filter_date)
         except ValueError:
             pass
+            
+    if search_query:
+        query = query.filter(Transaction.description.ilike(f'%{search_query}%'))
 
     transactions = query.order_by(
         Transaction.date.desc(), Transaction.created_at.desc()
@@ -500,7 +504,8 @@ def transactions():
                            type_filter=type_filter,
                            category_filter=category_filter,
                            payment_method_filter=payment_method_filter,
-                           date_filter=date_filter)
+                           date_filter=date_filter,
+                           search_query=search_query)
 
 
 @app.route('/transaction/add', methods=['GET', 'POST'])

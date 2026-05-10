@@ -62,7 +62,7 @@
                         </div>
                         <div class="budget-card-actions">
                             <form method="POST" action="{{ url_for('delete_budget', id=b.id) }}" 
-                                   onsubmit="return confirm('Hapus anggaran kategori {{ b.category }}?');">
+                                   onsubmit="confirmDelete(event, this, 'Hapus anggaran kategori {{ b.category }}?');">
                                 <button type="submit" class="btn-delete-small">
                                     <i class="fas fa-times"></i>
                                 </button>
@@ -131,9 +131,10 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom: 24px;">
-                    <label class="form-label" for="budget_amount">Batas Anggaran (Rp)</label>
-                    <input type="number" class="form-control amount-input-styled" id="budget_amount" name="amount"
-                           placeholder="0" required min="1000" step="any">
+                    <label class="form-label" for="budget_amount_display">Batas Anggaran (Rp)</label>
+                    <input type="text" class="form-control amount-input-styled" id="budget_amount_display"
+                           placeholder="0" required inputmode="numeric" oninput="formatCurrency(this)">
+                    <input type="hidden" id="budget_amount" name="amount">
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-block">
@@ -143,4 +144,29 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function formatCurrency(input) {
+        let value = input.value.replace(/\D/g, '');
+        if (value === '') {
+            input.value = '';
+            document.getElementById('budget_amount').value = '';
+            return;
+        }
+        document.getElementById('budget_amount').value = value;
+        input.value = parseInt(value, 10).toLocaleString('id-ID').replace(/,/g, '.');
+    }
+
+    const budgetForm = document.querySelector('form[action="{{ url_for("add_budget") }}"]');
+    if (budgetForm) {
+        budgetForm.addEventListener('submit', function(e) {
+            if (!document.getElementById('budget_amount').value) {
+                e.preventDefault();
+                alert('Batas anggaran tidak boleh kosong');
+            }
+        });
+    }
+</script>
 {% endblock %}
